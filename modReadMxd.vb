@@ -1,27 +1,23 @@
 Option Strict Off
 Option Explicit On
 
+Imports ArcGISVersionLib
 Imports ESRI.ArcGIS.Carto
+Imports ESRI.ArcGIS.Catalog
 Imports ESRI.ArcGIS.esriSystem
 Imports ESRI.ArcGIS.Display
 Imports ESRI.ArcGIS.Geometry
-Imports ESRI.ArcGIS.Catalog
-Imports System.Runtime.InteropServices
 Imports Ionic.Utils.Zip
 Imports System.Linq
+Imports System.Runtime.InteropServices
+
 
 
 Module modReadMxd
-    Friend NotInheritable Class NativeMethods
 
-        Private Sub New()
-        End Sub
-
-        <DllImport("user32.dll", CharSet:=CharSet.Auto, ExactSpelling:=True)> _
-        Friend Shared Function GetDesktopWindow() As IntPtr
-        End Function
-
-    End Class
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, ExactSpelling:=True)> _
+    Public Function GetDesktopWindow() As IntPtr
+    End Function
 
     Public sw As StreamWriter
     Public m_Version As Integer
@@ -212,7 +208,7 @@ Module modReadMxd
             pMapDocument.Open(sMxdName)
 
             pActiveView = pMapDocument.ActiveView
-            pActiveView.Activate(NativeMethods.GetDesktopWindow())
+            pActiveView.Activate(GetDesktopWindow())
         Catch e As Exception
             sw.WriteLine("Error: document would not open. " & e.ToString)
             Exit Sub
@@ -222,7 +218,6 @@ Module modReadMxd
         Dim pLayer As ILayer
         'Dim pGeoFL As IGeoFeatureLayer
         Dim pEnumLayer As IEnumLayer
-        '        Dim pUID As New UID
         Dim lMapCount As Integer
 
         lMapCount = pMapDocument.MapCount
@@ -511,11 +506,7 @@ Module modReadMxd
                     sw.WriteLine(InsertTabs(1) & "Maplex overposter props:")
                     sTmp = ""
                     pMaplexOverposterProperties = pMapOverposter.OverposterProperties
-                    Dim pMaplexOverposterProperties2 As IMaplexOverposterProperties2 = Nothing
-                    If m_Version >= 101 Then 'new at 10.1
-                        pMaplexOverposterProperties2 = pMapOverposter.OverposterProperties
-                        sTmp = " (not used)"
-                    End If
+
                     If pMaplexOverposterProperties.EnableConnection Then
                         Select Case pMaplexOverposterProperties.ConnectionType
                             Case esriMaplexConnectionType.esriMaplexMinimizeLabels
@@ -570,49 +561,7 @@ Module modReadMxd
                             Next
                         Next
                     End If 'dictionaries
-                    If m_Version >= 101 Then
-                        mxdProps.pKeyNumberGroups = pMaplexOverposterProperties2.KeyNumberGroups
-                        If mxdProps.pKeyNumberGroups.GroupCount Then
-                            Dim pKeyNumberGroup As IMaplexKeyNumberGroup
-                            sw.WriteLine(InsertTabs(2) & mxdProps.pKeyNumberGroups.GroupCount & " key number groups found:")
-                            For i = 0 To mxdProps.pKeyNumberGroups.GroupCount - 1
-                                pKeyNumberGroup = mxdProps.pKeyNumberGroups.GetGroup(i)
-                                sw.WriteLine(InsertTabs(3) & "Group name: " & pKeyNumberGroup.Name)
-                                Select Case pKeyNumberGroup.HorizontalAlignment
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentAuto
-                                        sw.WriteLine(InsertTabs(4) & "Auto alignment")
-                                        mxdProps.bKNAuto = True
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentLeft
-                                        sw.WriteLine(InsertTabs(4) & "Left alignment")
-                                        mxdProps.bKNLeft = True
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentRight
-                                        sw.WriteLine(InsertTabs(4) & "Right alignment")
-                                        mxdProps.bKNRight = True
-                                    Case Else
-                                        sw.WriteLine(InsertTabs(4) & "Error: Alignment not set")
-                                End Select
-                                Select Case pKeyNumberGroup.NumberResetType
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeAlways
-                                        sw.WriteLine(InsertTabs(4) & "Always reset")
-                                        mxdProps.bKNAlwaysReset = True
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeMaybe
-                                        sw.WriteLine(InsertTabs(4) & "May reset")
-                                        mxdProps.bKNMayReset = True
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeNone
-                                        sw.WriteLine(InsertTabs(4) & "No reset")
-                                        mxdProps.bKNNoReset = True
-                                    Case Else
-                                        sw.WriteLine(InsertTabs(4) & "Error: Reset not set")
-                                End Select
-                                sw.WriteLine(InsertTabs(4) & "Delimiter: " & pKeyNumberGroup.DelimiterCharacter)
-                                If pKeyNumberGroup.DelimiterCharacter <> "." Then mxdProps.bKNDelimiter = True
-                                sw.WriteLine(InsertTabs(4) & "Min lines: " & pKeyNumberGroup.MinimumNumberOfLines)
-                                If pKeyNumberGroup.MinimumNumberOfLines <> 2 Then mxdProps.bKNMin = True
-                                sw.WriteLine(InsertTabs(4) & "Max lines: " & pKeyNumberGroup.MaximumNumberOfLines)
-                                If pKeyNumberGroup.MaximumNumberOfLines <> 20 Then mxdProps.bKNMax = True
-                            Next
-                        End If 'key number groups
-                    End If '10.1
+
                 End If 'mle
 
                 'bookmarks

@@ -2,13 +2,13 @@ Option Strict Off
 Option Explicit On
 
 Imports ESRI.ArcGIS.Carto
-Imports ESRI.ArcGIS.Geodatabase
-Imports ESRI.ArcGIS.GISClient
-Imports ESRI.ArcGIS.Geometry
 Imports ESRI.ArcGIS.DataSourcesFile
 Imports ESRI.ArcGIS.DataSourcesGDB
 Imports ESRI.ArcGIS.Display
 Imports ESRI.ArcGIS.esriSystem
+Imports ESRI.ArcGIS.Geodatabase
+Imports ESRI.ArcGIS.GISClient
+Imports ESRI.ArcGIS.Geometry
 Imports System.Text.RegularExpressions
 
 
@@ -589,7 +589,7 @@ Module ModFunctions
         Dim pLineFillSym As ESRI.ArcGIS.Display.ILineFillSymbol
         Dim pMarkFillSym As ESRI.ArcGIS.Display.IMarkerFillSymbol
         Dim pPicFillSym As ESRI.ArcGIS.Display.IPictureFillSymbol
-'        Dim pTexFillSym As ESRI.ArcGIS.Analyst3D.ITextureFillSymbol
+        '        Dim pTexFillSym As ESRI.ArcGIS.Analyst3D.ITextureFillSymbol
         Dim pLineSym As ESRI.ArcGIS.Display.ILineSymbol
         Dim pSimpLineSym As ESRI.ArcGIS.Display.ISimpleLineSymbol
         Dim pMLyrLineSym As ESRI.ArcGIS.Display.IMultiLayerLineSymbol
@@ -1390,7 +1390,6 @@ Module ModFunctions
         Dim pMpxOpLProps2 As IMaplexOverposterLayerProperties2 = Nothing
         Dim pMpxRotProps2 As IMaplexRotationProperties2 = Nothing
         Dim pMpxOpLProps3 As IMaplexOverposterLayerProperties3 = Nothing
-        Dim pMpxOpLProps4 As IMaplexOverposterLayerProperties4 = Nothing
         Dim bIsStreetLine, bIsOffsetLine, bIsRegularLine As Boolean
         Dim bIsStreetAddress, bIsRegularPolygon As Boolean
 
@@ -1408,9 +1407,6 @@ Module ModFunctions
             If m_Version >= 94 Then
                 pMpxOpLProps3 = pLabelEngineLayerProperties.OverposterLayerProperties
             End If '>=9.4
-            If m_Version >= 101 Then
-                pMpxOpLProps4 = pLabelEngineLayerProperties.OverposterLayerProperties
-            End If '>=10.1
         Catch ex As Exception
             Return
         End Try
@@ -1452,12 +1448,6 @@ Module ModFunctions
                         mxdProps.bPointFtrGeom = True
                     End If
                 End If '>=9.3
-                If m_Version >= 101 Then
-                    If pMpxOpLProps4.UseExactSymbolOutline Then
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Use symbol outline")
-                        mxdProps.bSymbolOutline = True
-                    End If
-                End If '>=10.1
             End If
             If pMpxOpLProps.GraticuleAlignment Then
                 If m_Version >= 93 Then
@@ -1652,12 +1642,6 @@ Module ModFunctions
                     If pMpxOffAlongLine.UseLineDirection Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Use line direction")
                 End If
             End If 'offset
-            If m_Version >= 101 Then
-                If pMpxOpLProps4.AllowStraddleStacking And pMpxOpLProps2.LineFeatureType = esriMaplexLineFeatureType.esriMaplexLineFeature Then
-                    sw.WriteLine(InsertTabs(lTabLevel) & "Allow straddle stacking")
-                    mxdProps.bStraddlacking = True
-                End If
-            End If
             If m_Version >= 93 Then
                 If pMpxOpLProps2.EnableSecondaryOffset Then
                     sw.WriteLine(InsertTabs(lTabLevel) & "Secondary offset between " & pMpxOpLProps2.SecondaryOffsetMinimum & _
@@ -1718,18 +1702,6 @@ Module ModFunctions
                 End If
                 sw.WriteLine(sTmp)
                 mxdProps.bLineRepeat = True
-                If m_Version >= 101 Then
-                    If pMpxOpLProps4.PreferLabelNearJunction Then
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Prefer label near junction")
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Clearance: " & pMpxOpLProps4.PreferLabelNearJunctionClearance)
-                        mxdProps.bLabelNearJunction = True
-                    End If
-                    If pMpxOpLProps4.PreferLabelNearMapBorder Then
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Prefer label near border")
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Clearance: " & pMpxOpLProps4.PreferLabelNearMapBorderClearance)
-                        mxdProps.bLabelNearBorder = True
-                    End If
-                End If '10.1
             End If
             If pMpxOpLProps.SpreadCharacters Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Spread characters: " & pMpxOpLProps.MaximumCharacterSpacing & "%" & _
@@ -1763,34 +1735,6 @@ Module ModFunctions
                     mxdProps.bLineGAStr = True
                 End If '>=9.3
             End If 'graticule
-            If m_Version >= 101 Then
-                If pMpxOpLProps4.EnableConnection Then
-                    Select Case pMpxOpLProps4.ConnectionType
-                        Case esriMaplexConnectionType.esriMaplexMinimizeLabels
-                            sw.WriteLine(InsertTabs(lTabLevel) & "Line connection: Minimize")
-                            mxdProps.bMinimize = True
-                        Case esriMaplexConnectionType.esriMaplexUnambiguous
-                            sw.WriteLine(InsertTabs(lTabLevel) & "Line connection: Unambiguous")
-                            mxdProps.bUnambiguous = True
-                        Case Else
-                            sw.WriteLine(InsertTabs(lTabLevel) & "Line connection: Unknown")
-                    End Select
-                Else
-                    Select Case pMpxOpLProps4.MultiPartOption
-                        Case esriMaplexMultiPartOption.esriMaplexOneLabelPerFeature
-                            sw.WriteLine(InsertTabs(lTabLevel) & "One label per feature")
-                            mxdProps.bMultiOptionFeature = True
-                        Case esriMaplexMultiPartOption.esriMaplexOneLabelPerPart
-                            sw.WriteLine(InsertTabs(lTabLevel) & "One label per feature part")
-                            mxdProps.bMultiOptionPart = True
-                        Case esriMaplexMultiPartOption.esriMaplexOneLabelPerSegment
-                            sw.WriteLine(InsertTabs(lTabLevel) & "One label per segment")
-                            mxdProps.bMultiOptionSegment = True
-                        Case Else
-                            sw.WriteLine(InsertTabs(lTabLevel) & "Error: Unknown multi-part option")
-                    End Select
-                End If 'connection
-            End If '10.1
 
         ElseIf pMpxOpLProps.FeatureType = esriBasicOverposterFeatureType.esriOverposterPolygon Then
             'polygons
@@ -1973,23 +1917,7 @@ Module ModFunctions
                     mxdProps.bPolyAllowHoles = True
                 End If
             End If
-            If m_Version >= 101 Then
-                If pMpxOpLProps4.LabelLargestPolygon Then
-                    sw.WriteLine(InsertTabs(lTabLevel) & "Label largest polygon")
-                    mxdProps.bLargestOnly = True
-                End If
-            End If '10.1
         End If 'feature type
-        If m_Version >= 101 Then
-            If Not pMpxOpLProps4.RemoveExtraWhiteSpace Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Remove extra whitespace is off")
-                mxdProps.bWhitespace = True
-            End If
-            If pMpxOpLProps4.RemoveExtraLineBreaks Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Remove extra line breaks")
-                mxdProps.bLinebreaks = True
-            End If
-        End If
 
         'Strategy tab
         sw.WriteLine(InsertTabs(lTabLevel - 1) & "Strategies:")
@@ -2066,18 +1994,6 @@ Module ModFunctions
             If pMpxOpLProps.CanTruncateLabel Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Truncation")
                 mxdProps.bTruncation = True
-                If m_Version >= 101 Then
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Min word length: " & pMpxOpLProps4.TruncationMinimumLength)
-                    If pMpxOpLProps4.TruncationMinimumLength <> 1 Then mxdProps.bTruncationLength = True
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Marker character: " & pMpxOpLProps4.TruncationMarkerCharacter)
-                    If pMpxOpLProps4.TruncationMarkerCharacter <> "." Then mxdProps.bTruncationMarker = True
-                    mxdProps.sTruncMarker(mxdProps.lTruncMarker) = pMpxOpLProps4.TruncationMarkerCharacter
-                    AddIfUnique(mxdProps.lTruncMarker, mxdProps.sTruncMarker, ARRAY_SIZE)
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Remove characters: " & pMpxOpLProps4.TruncationPreferredCharacters)
-                    If StrComp(pMpxOpLProps4.TruncationPreferredCharacters, "aeiou", vbTextCompare) <> 0 Then mxdProps.bTruncationChars = True
-                    mxdProps.sTruncChars(mxdProps.lTruncChars) = pMpxOpLProps4.TruncationPreferredCharacters
-                    AddIfUnique(mxdProps.lTruncChars, mxdProps.sTruncChars, ARRAY_SIZE)
-                End If '10.1
             End If
         End If
         If pMpxOpLProps.MinimumSizeForLabeling Then
@@ -2110,13 +2026,6 @@ Module ModFunctions
                 If StrComp(sTmp, "Strategy priority order: Stack Overrun Compress Reduce Abbreviate ") <> 0 Then mxdProps.bStrategyPriority = True
             End If
         End If '>=9.3
-        If m_Version >= 101 Then
-            If pMpxOpLProps4.CanKeyNumberLabel Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Key numbering")
-                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Group name: " & pMpxOpLProps4.KeyNumberGroupName)
-                mxdProps.bKeyNumbering = True
-            End If
-        End If '10.1
 
         'Conflict tab
         sw.WriteLine(InsertTabs(lTabLevel - 1) & "Conflicts:")

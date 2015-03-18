@@ -9,7 +9,7 @@ Public Class ArcInit
 
     Public m_Version As Integer
     Public m_VerStr As String
-    <Security.Permissions.EnvironmentPermissionAttribute(Security.Permissions.SecurityAction.LinkDemand, Unrestricted:=True)> _
+
     Public Function LoadVersionAndCheckOutLicense(ByRef sErr As String) As Boolean
         LoadVersionAndCheckOutLicense = True
         Dim VersMan As New ArcGISVersionLib.VersionManager
@@ -51,13 +51,13 @@ Public Class ArcInit
 
         Select Case LCase(strSoftwareClass)
             Case "professional"
-                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeAdvanced
+                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeArcInfo
             Case "editor"
-                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeStandard
+                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeArcEditor
             Case "viewer"
-                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeBasic
+                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeArcView
             Case Else
-                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeAdvanced
+                productCode = esriSystem.esriLicenseProductCode.esriLicenseProductCodeArcInfo
         End Select
 
         'initialize license
@@ -83,7 +83,7 @@ Public Class ArcInit
 
     End Function
 
-    <Security.Permissions.EnvironmentPermissionAttribute(Security.Permissions.SecurityAction.LinkDemand, Unrestricted:=True)> _
+
     Public Function GetArcGISVersion(Optional ByRef sDLLFile As String = "AfCore.dll") As FileVersionInfo
 
         Try

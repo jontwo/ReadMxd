@@ -86,6 +86,5 @@ Public Class clsMxdProps
     Public sDataSources(ARRAY_SIZE), sSRef(), sMapUnits() As String
     Public lDataSources As Long
     Public pDictionaries As IMaplexDictionaries
-    Public pKeyNumberGroups As IMaplexKeyNumberGroups
 
 End Class
