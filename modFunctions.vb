@@ -162,7 +162,8 @@ Module ModFunctions
                         End If
                     End If
                     If Not pGeoFL.Renderer Is Nothing Then GetRendererProps(pGeoFL.Renderer, lTabLevel + 1, bSymbolLevels)
-                Else
+                End If
+                If bReadLabels Then
                     'label class visibility
                     If pGeoFL.DisplayAnnotation Or bAllLayers Then
                         sw.WriteLine(InsertTabs(lTabLevel) & "Display label classes: " & pGeoFL.DisplayAnnotation)
@@ -210,8 +211,8 @@ Module ModFunctions
 
             '********************
         ElseIf TypeOf pLayer Is IFDOGraphicsLayer Then
-            If Not bReadSymbols Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Anno layer")
+            sw.WriteLine(InsertTabs(lTabLevel) & "Anno layer")
+            If bReadLabels Then
                 pLayerFX = pLayer
                 If pLayerFX.Transparency > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Transparency: " & pLayerFX.Transparency & "%")
                 iSelFtrs = GetSelectedFeatures(pLayer, lTabLevel)
@@ -255,24 +256,24 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Anno layer " & i + 1 & "\" & pCompLayer.Count)
                     GetLayerProps(pSubLayer, lTabLevel + 2)
                 Next
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is IAnnotationSublayer Then
-            If Not bReadSymbols Then
-                pAnnoSubLayer = pLayer
-                sw.WriteLine(InsertTabs(lTabLevel) & "Annotation Class ID: " & pAnnoSubLayer.AnnotationClassID)
+            pAnnoSubLayer = pLayer
+            sw.WriteLine(InsertTabs(lTabLevel) & "Annotation Class ID: " & pAnnoSubLayer.AnnotationClassID)
+            If bReadLabels Then
                 ' Get the feature class from the feature layer.
                 Dim featureLayer As IFeatureLayer = CType(pAnnoSubLayer.Parent, IFeatureLayer)
                 Dim featureClass As IFeatureClass = featureLayer.FeatureClass
                 pAnnoClassExt = featureClass.Extension
                 GetAnnoProps(pLayer, pAnnoClassExt.AnnoProperties, Nothing, False, lTabLevel)
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is ICompositeGraphicsLayer Then
-            If Not bReadSymbols Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Composite Graphics layer")
+            sw.WriteLine(InsertTabs(lTabLevel) & "Composite Graphics layer")
+            If bReadLabels Then
                 pCompLayer = pLayer
                 For i = 0 To pCompLayer.Count - 1
                     pSubLayer = pCompLayer.Layer(i)
@@ -285,7 +286,7 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & sTmp)
                     sw.WriteLine(InsertTabs(lTabLevel + 2) & "Visible: " & pSubLayer.Visible)
                 Next
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is IGraphicsLayer Then
@@ -293,18 +294,18 @@ Module ModFunctions
 
             '********************
         ElseIf TypeOf pLayer Is ICoverageAnnotationLayer Then
-            If Not bReadSymbols Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Coverage anno layer")
+            sw.WriteLine(InsertTabs(lTabLevel) & "Coverage anno layer")
+            If bReadLabels Then
                 pLayerFX = pLayer
                 If pLayerFX.Transparency > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Transparency: " & pLayerFX.Transparency & "%")
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is IMapServerLayer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Map server layer")
             pLayerFX = pLayer
             If pLayerFX.Transparency > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Transparency: " & pLayerFX.Transparency & "%")
-            If Not bReadSymbols Then
+            If bReadLabels Then
                 Try
                     pMapServerLayer = pLayer
                     pMapServerLayer.GetConnectionInfo(pIAGSName, sDoc, sMap)
@@ -319,15 +320,15 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel) & "Error: could not get connection info. " & ex.Message)
                 End Try
                 'Exit Sub
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is IBasemapLayer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Basemap layer")
-            If Not bReadSymbols Then
+            If bReadLabels Then
                 pBasemapLayer = pLayer
                 If pBasemapLayer.CanDraw Then sw.WriteLine(InsertTabs(lTabLevel) & "Can draw")
-            End If 'read symbols
+            End If 'read labels
 
             '********************
         ElseIf TypeOf pLayer Is IImageServerLayer Then
