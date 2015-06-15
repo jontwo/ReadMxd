@@ -25,6 +25,7 @@ Module modReadMxd
     Public bShowFullExp As Boolean
     Public bLyrFile As Boolean
     Public bReadSymbols As Boolean
+    Public bReadLabels As Boolean
     Private pMapDocument As IMapDocument = Nothing
     Private pActiveView As IActiveView = Nothing
     Public mxdProps As clsMxdProps = Nothing
@@ -45,6 +46,7 @@ Module modReadMxd
         bLocalLog = False
         bShowFullExp = False
         bReadSymbols = False
+        bReadLabels = False
         For i = 1 To UBound(sArgs)
             Select Case LCase(sArgs(i))
                 Case "-a"
@@ -57,6 +59,8 @@ Module modReadMxd
                     bShowFullExp = True
                 Case "-s"
                     bReadSymbols = True
+                Case "-b"  'sorry, l is already taken!
+                    bReadLabels = True
                 Case Else
                     'reconstruct if spaces in file name
                     sMxdName = sMxdName & sArgs(i) & " "
@@ -96,28 +100,19 @@ Module modReadMxd
 
         'set log name
         If bLocalLog Then
-            If bReadSymbols Then
-                sLogName = Replace(sMxdName, sType, "_symbols.log")
+            If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
+                sLogName = Replace(sMxdName, sType, "_props.log")
             Else
-                If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
-                    sLogName = Replace(sMxdName, sType, "_props.log")
-                Else
-                    sLogName = Replace(sMxdName, ".", "_") + "_props.log"
-                End If
+                sLogName = Replace(sMxdName, ".", "_") + "_props.log"
             End If
         ElseIf StrComp(My.Application.Info.DirectoryPath, Environment.CurrentDirectory()) = 0 Then
             sLogName = My.Application.Info.DirectoryPath & "\MxdProps.log"
         Else
-            If bReadSymbols Then
+            If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
                 sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), _
-                                                                    sType, "_symbols.log")
+                                                                    sType, "_props.log")
             Else
-                If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
-                    sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), _
-                                                                        sType, "_props.log")
-                Else
-                    sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), ".", "_") + "_props.log"
-                End If
+                sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), ".", "_") + "_props.log"
             End If
         End If
 
@@ -197,11 +192,13 @@ Module modReadMxd
                 GetLayerProps(gxLayerCls.Layer(), 2)
             End If
             sw.WriteLine("")
-            WritePropSummary()
+            WriteLabelSummary()
             Exit Sub
         End If
 
         If bAllLayers Then sw.WriteLine("Showing all layers")
+        If bReadSymbols Then sw.WriteLine("Reading symbols")
+        If bReadLabels Then sw.WriteLine("Reading labels")
         'open mxd
         Try
             pMapDocument = New MapDocument
@@ -485,7 +482,7 @@ Module modReadMxd
             pMap.GetPageSize(dW, dH)
             If dW.CompareTo(0) <> 0 And dH.CompareTo(0) <> 0 Then sw.WriteLine(InsertTabs(1) & "Page Size: " & CDbl(dW) & " x " & CDbl(dH) & " inches")
 
-            If Not bReadSymbols Then
+            If bReadLabels Then
                 'overposter options
                 sw.WriteLine(InsertTabs(1) & "Overposter options:")
                 pMapOverposter = pMap
@@ -561,7 +558,6 @@ Module modReadMxd
                             Next
                         Next
                     End If 'dictionaries
-
                 End If 'mle
 
                 'bookmarks
@@ -629,8 +625,9 @@ Module modReadMxd
         If bReadSymbols Then
             WriteSymbolSummary()
             If bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
-        Else
-            WritePropSummary()
+        End If
+        If bReadLabels Then
+            WriteLabelSummary()
             If mxdProps.bMLE And bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
         End If
 
@@ -687,11 +684,11 @@ Module modReadMxd
     End Sub
 
     'Sum up all the properties used in this map document
-    Private Sub WritePropSummary()
+    Private Sub WriteLabelSummary()
 
         Dim sTmp As String
         Dim i As Integer
-        sw.WriteLine(vbCrLf & "Summary:" & vbCrLf & "Polygons:")
+        sw.WriteLine(vbCrLf & "Label Properties Summary:" & vbCrLf & "Polygons:")
         If mxdProps.bPolyHorz Then sw.WriteLine(InsertTabs(1) & "Polygon horizontal")
         If mxdProps.bPolyStr Then sw.WriteLine(InsertTabs(1) & "Polygon straight")
         If mxdProps.bPolyCurv Then sw.WriteLine(InsertTabs(1) & "Polygon curved")
@@ -958,7 +955,7 @@ Module modReadMxd
 
         'Dim sTmp As String
         'Dim i As Integer
-        sw.WriteLine(vbCrLf & "Summary:")
+        sw.WriteLine(vbCrLf & "Symbol Properties Summary:")
         If mxdProps.bBarChart Then sw.WriteLine(InsertTabs(1) & "Bar chart")
         If mxdProps.bStackedChart Then sw.WriteLine(InsertTabs(1) & "Stacked chart")
         If mxdProps.bPieChart Then sw.WriteLine(InsertTabs(1) & "Pie chart")
