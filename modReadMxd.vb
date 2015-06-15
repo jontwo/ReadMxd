@@ -7,6 +7,7 @@ Imports ESRI.ArcGIS.Display
 Imports ESRI.ArcGIS.Geometry
 Imports ESRI.ArcGIS.Catalog
 Imports System.Runtime.InteropServices
+Imports ESRI.ArcGIS.Geodatabase
 Imports Ionic.Utils.Zip
 Imports System.Linq
 
@@ -663,7 +664,22 @@ Module modReadMxd
                 sw.WriteLine("")
             End If
 
-            If bReadSymbols Then sw.WriteLine(String.Format("End Map #{0}", pMapDocument.MapCount - lMapCount + 1))
+            'list tables
+            Dim pTableColl As ITableCollection = CType(pMap, ITableCollection)
+            Dim pTable As ITable
+            Dim pDataset As IDataset
+            For i = 0 To pTableColl.TableCount - 1
+                pTable = pTableColl.Table(i)
+                pDataset = CType(pTable, IDataset)
+                sw.WriteLine(InsertTabs(1) & "Table " & i + 1 & "/" & pTableColl.TableCount)
+                sw.WriteLine(InsertTabs(2) & "Name: " & pDataset.Name)
+                sw.WriteLine(InsertTabs(2) & "Data source: " & pDataset.Workspace.PathName)
+                sw.WriteLine("")
+                mxdProps.sDataSources(mxdProps.lDataSources) = pDataset.Workspace.PathName
+                AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
+            Next
+
+            sw.WriteLine(String.Format("End Map #{0}", pMapDocument.MapCount - lMapCount + 1))
             If mxdProps.bLayoutView Or bAllLayers Then
                 'layout view - next frame
                 If lMapCount > 1 Then
