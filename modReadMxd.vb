@@ -670,18 +670,27 @@ Module modReadMxd
             End If
 
             'list tables
-            Dim pTableColl As ITableCollection = CType(pMap, ITableCollection)
+            Dim pTableColl As IStandaloneTableCollection = CType(pMap, IStandaloneTableCollection)
             Dim pTable As ITable
             Dim pDataset As IDataset
-            For i = 0 To pTableColl.TableCount - 1
-                pTable = pTableColl.Table(i)
+            For i = 0 To pTableColl.StandaloneTableCount - 1
+                pTable = pTableColl.StandaloneTable(i)
                 pDataset = CType(pTable, IDataset)
-                sw.WriteLine(InsertTabs(1) & "Table " & i + 1 & "/" & pTableColl.TableCount)
+                sw.WriteLine(InsertTabs(1) & "Table " & i + 1 & "/" & pTableColl.StandaloneTableCount)
+                If pDataset Is Nothing Then
+                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read table details")
+                    sw.WriteLine("")
+                    Continue For
+                End If
                 sw.WriteLine(InsertTabs(2) & "Name: " & pDataset.Name)
-                sw.WriteLine(InsertTabs(2) & "Data source: " & pDataset.Workspace.PathName)
+                Try
+                    sw.WriteLine(InsertTabs(2) & "Data source: " & pDataset.Workspace.PathName)
+                    mxdProps.sDataSources(mxdProps.lDataSources) = pDataset.Workspace.PathName
+                    AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
+                Catch ex As Exception
+                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read data source name")
+                End Try
                 sw.WriteLine("")
-                mxdProps.sDataSources(mxdProps.lDataSources) = pDataset.Workspace.PathName
-                AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
             Next
 
             sw.WriteLine(String.Format("End Map #{0}", pMapDocument.MapCount - lMapCount + 1))
