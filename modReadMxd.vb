@@ -312,11 +312,19 @@ Module modReadMxd
                 'detect SLE - don't try to read MLE props
                 mxdProps.bMapIsMLE = False
                 mxdProps.bMapIsSLE = False
+                Dim SLEName As String = ""
                 If StrComp(pMap.AnnotationEngine.Name, "ESRI Maplex Label Engine", CompareMethod.Text) = 0 Then
                     mxdProps.bMLE = True
                     mxdProps.bMapIsMLE = True
                 End If
-                If StrComp(pMap.AnnotationEngine.Name, "Standard Label Engine", CompareMethod.Text) = 0 Then
+                'TODO check this against other versions
+                'looks like ESRI was removed between 10.0 and 10.2
+                If m_Version < 101 Then
+                    SLEName = "ESRI Standard Label Engine"
+                Else
+                    SLEName = "Standard Label Engine"
+                End If
+                If StrComp(pMap.AnnotationEngine.Name, SLEName, CompareMethod.Text) = 0 Then
                     mxdProps.bSLE = True
                     mxdProps.bMapIsSLE = True
                 End If
