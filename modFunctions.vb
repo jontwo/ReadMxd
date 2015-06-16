@@ -172,6 +172,8 @@ Module ModFunctions
                         'include weights even if not visible
                         sw.WriteLine(InsertTabs(lTabLevel) & "Display label classes: " & pGeoFL.DisplayAnnotation & " - showing weighted label classes only")
                         pAnnotateLPColl = pGeoFL.AnnotationProperties
+                        If pAnnotateLPColl Is Nothing Then Return
+
                         For lLabelClass = 0 To pAnnotateLPColl.Count - 1
                             pAnnotateLPColl.QueryItem(lLabelClass, pAnnotateLP, Nothing, Nothing)
                             pLabelEngineLayerProperties = pAnnotateLP
