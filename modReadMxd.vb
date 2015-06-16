@@ -312,9 +312,9 @@ Module modReadMxd
                     mxdProps.bMLE = True
                     mxdProps.bMapIsMLE = True
                 End If
-                'TODO check this against previous versions
-                'not sure if ESRI was added at 10 or it didn't work before!
-                If m_Version >= 100 Then
+                'TODO check this against other versions
+                'looks like ESRI was removed between 10.0 and 10.2
+                If m_Version < 101 Then
                     SLEName = "ESRI Standard Label Engine"
                 Else
                     SLEName = "Standard Label Engine"
