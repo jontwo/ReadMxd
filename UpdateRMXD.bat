@@ -22,31 +22,29 @@ if exist %~dp0bin\x64\Release (
 )
 
 echo copying Latest ReadMxd to:
-call :copyRMXD D: Projects\ReadMxd\dist
+call :copyRMXD D:\Projects\ReadMxd\dist
 
 :end
 echo.
 set GETVER=
 set HOMEBUILD=
 set BUILD=
-set DEST=
 set SRCDIR=
 pause
 goto :eof
 
 :copyRMXD
-set DEST=%1\%2
 echo.
-echo !DEST!
-if not exist !DEST! (
-	echo !DEST! not found
+echo %1
+if not exist %1 (
+	echo %1 not found
   goto :eof
 )
-echo Copying ReadMxd from %SRCDIR% to !DEST!
-if exist "%SRCDIR%\ReadMxdW.exe" xcopy "%SRCDIR%\ReadMxdW.exe" !DEST! /y /q
-if exist "%SRCDIR%\ReadMxdW.pdb" xcopy "%SRCDIR%\ReadMxdW.pdb" !DEST! /y /q
-if exist "%SRCDIR%\ReadMxdXI.exe" xcopy "%SRCDIR%\ReadMxdXI.exe" !DEST! /y /q
-if exist "%SRCDIR%\ReadMxdXI.pdb" xcopy "%SRCDIR%\ReadMxdXI.pdb" !DEST! /y /q
-if exist "%SRCDIR%\Ionic.Utils.Zip.dll" xcopy "%SRCDIR%\Ionic.Utils.Zip.dll" !DEST! /y /q
-if exist "%SRCDIR%\Interop.ArcGISVersionLib.dll" xcopy "%SRCDIR%\Interop.ArcGISVersionLib.dll" !DEST! /y /q
+echo Copying ReadMxd from %SRCDIR% to %1
+if exist "%SRCDIR%\ReadMxdW.exe" xcopy "%SRCDIR%\ReadMxdW.exe" %1 /y /q
+if exist "%SRCDIR%\ReadMxdW.pdb" xcopy "%SRCDIR%\ReadMxdW.pdb" %1 /y /q
+if exist "%SRCDIR%\ReadMxdXI.exe" xcopy "%SRCDIR%\ReadMxdXI.exe" %1 /y /q
+if exist "%SRCDIR%\ReadMxdXI.pdb" xcopy "%SRCDIR%\ReadMxdXI.pdb" %1 /y /q
+if exist "%SRCDIR%\Ionic.Utils.Zip.dll" xcopy "%SRCDIR%\Ionic.Utils.Zip.dll" %1 /y /q
+if exist "%SRCDIR%\Interop.ArcGISVersionLib.dll" xcopy "%SRCDIR%\Interop.ArcGISVersionLib.dll" %1 /y /q
 goto :eof
