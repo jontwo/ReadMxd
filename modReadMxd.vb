@@ -1,27 +1,24 @@
 Option Strict Off
 Option Explicit On
 
+Imports ArcGISVersionLib
 Imports ESRI.ArcGIS.Carto
+Imports ESRI.ArcGIS.Catalog
 Imports ESRI.ArcGIS.esriSystem
 Imports ESRI.ArcGIS.Display
 Imports ESRI.ArcGIS.Geometry
-Imports ESRI.ArcGIS.Catalog
-Imports System.Runtime.InteropServices
+Imports ESRI.ArcGIS.Geodatabase
 Imports Ionic.Utils.Zip
 Imports System.Linq
+Imports System.Runtime.InteropServices
+
 
 
 Module modReadMxd
-    Friend NotInheritable Class NativeMethods
 
-        Private Sub New()
-        End Sub
-
-        <DllImport("user32.dll", CharSet:=CharSet.Auto, ExactSpelling:=True)> _
-        Friend Shared Function GetDesktopWindow() As IntPtr
-        End Function
-
-    End Class
+    <DllImport("user32.dll", CharSet:=CharSet.Auto, ExactSpelling:=True)> _
+    Public Function GetDesktopWindow() As IntPtr
+    End Function
 
     Public sw As StreamWriter
     Public m_Version As Integer
@@ -29,6 +26,7 @@ Module modReadMxd
     Public bShowFullExp As Boolean
     Public bLyrFile As Boolean
     Public bReadSymbols As Boolean
+    Public bReadLabels As Boolean
     Private pMapDocument As IMapDocument = Nothing
     Private pActiveView As IActiveView = Nothing
     Public mxdProps As clsMxdProps = Nothing
@@ -49,6 +47,7 @@ Module modReadMxd
         bLocalLog = False
         bShowFullExp = False
         bReadSymbols = False
+        bReadLabels = False
         For i = 1 To UBound(sArgs)
             Select Case LCase(sArgs(i))
                 Case "-a"
@@ -61,6 +60,8 @@ Module modReadMxd
                     bShowFullExp = True
                 Case "-s"
                     bReadSymbols = True
+                Case "-b"  'sorry, l is already taken!
+                    bReadLabels = True
                 Case Else
                     'reconstruct if spaces in file name
                     sMxdName = sMxdName & sArgs(i) & " "
@@ -100,28 +101,19 @@ Module modReadMxd
 
         'set log name
         If bLocalLog Then
-            If bReadSymbols Then
-                sLogName = Replace(sMxdName, sType, "_symbols.log")
+            If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
+                sLogName = Replace(sMxdName, sType, "_props.log")
             Else
-                If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
-                    sLogName = Replace(sMxdName, sType, "_props.log")
-                Else
-                    sLogName = Replace(sMxdName, ".", "_") + "_props.log"
-                End If
+                sLogName = Replace(sMxdName, ".", "_") + "_props.log"
             End If
         ElseIf StrComp(My.Application.Info.DirectoryPath, Environment.CurrentDirectory()) = 0 Then
             sLogName = My.Application.Info.DirectoryPath & "\MxdProps.log"
         Else
-            If bReadSymbols Then
+            If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
                 sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), _
-                                                                    sType, "_symbols.log")
+                                                                    sType, "_props.log")
             Else
-                If sType.Equals(".mxd", StringComparison.CurrentCultureIgnoreCase) Then
-                    sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), _
-                                                                        sType, "_props.log")
-                Else
-                    sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), ".", "_") + "_props.log"
-                End If
+                sLogName = Environment.CurrentDirectory() & Replace(Mid(sMxdName, InStrRev(sMxdName, "\")), ".", "_") + "_props.log"
             End If
         End If
 
@@ -201,18 +193,20 @@ Module modReadMxd
                 GetLayerProps(gxLayerCls.Layer(), 2)
             End If
             sw.WriteLine("")
-            WritePropSummary()
+            WriteLabelSummary()
             Exit Sub
         End If
 
         If bAllLayers Then sw.WriteLine("Showing all layers")
+        If bReadSymbols Then sw.WriteLine("Reading symbols")
+        If bReadLabels Then sw.WriteLine("Reading labels")
         'open mxd
         Try
             pMapDocument = New MapDocument
             pMapDocument.Open(sMxdName)
 
             pActiveView = pMapDocument.ActiveView
-            pActiveView.Activate(NativeMethods.GetDesktopWindow())
+            pActiveView.Activate(GetDesktopWindow())
         Catch e As Exception
             sw.WriteLine("Error: document would not open. " & e.ToString)
             Exit Sub
@@ -222,7 +216,6 @@ Module modReadMxd
         Dim pLayer As ILayer
         'Dim pGeoFL As IGeoFeatureLayer
         Dim pEnumLayer As IEnumLayer
-        '        Dim pUID As New UID
         Dim lMapCount As Integer
 
         lMapCount = pMapDocument.MapCount
@@ -314,11 +307,19 @@ Module modReadMxd
                 'detect SLE - don't try to read MLE props
                 mxdProps.bMapIsMLE = False
                 mxdProps.bMapIsSLE = False
+                Dim SLEName As String = ""
                 If StrComp(pMap.AnnotationEngine.Name, "ESRI Maplex Label Engine", CompareMethod.Text) = 0 Then
                     mxdProps.bMLE = True
                     mxdProps.bMapIsMLE = True
                 End If
-                If StrComp(pMap.AnnotationEngine.Name, "Standard Label Engine", CompareMethod.Text) = 0 Then
+                'TODO check this against other versions
+                'looks like ESRI was removed between 10.0 and 10.2
+                If m_Version < 101 Then
+                    SLEName = "ESRI Standard Label Engine"
+                Else
+                    SLEName = "Standard Label Engine"
+                End If
+                If StrComp(pMap.AnnotationEngine.Name, SLEName, CompareMethod.Text) = 0 Then
                     mxdProps.bSLE = True
                     mxdProps.bMapIsSLE = True
                 End If
@@ -490,7 +491,7 @@ Module modReadMxd
             pMap.GetPageSize(dW, dH)
             If dW.CompareTo(0) <> 0 And dH.CompareTo(0) <> 0 Then sw.WriteLine(InsertTabs(1) & "Page Size: " & CDbl(dW) & " x " & CDbl(dH) & " inches")
 
-            If Not bReadSymbols Then
+            If bReadLabels Then
                 'overposter options
                 sw.WriteLine(InsertTabs(1) & "Overposter options:")
                 pMapOverposter = pMap
@@ -511,11 +512,7 @@ Module modReadMxd
                     sw.WriteLine(InsertTabs(1) & "Maplex overposter props:")
                     sTmp = ""
                     pMaplexOverposterProperties = pMapOverposter.OverposterProperties
-                    Dim pMaplexOverposterProperties2 As IMaplexOverposterProperties2 = Nothing
-                    If m_Version >= 101 Then 'new at 10.1
-                        pMaplexOverposterProperties2 = pMapOverposter.OverposterProperties
-                        sTmp = " (not used)"
-                    End If
+
                     If pMaplexOverposterProperties.EnableConnection Then
                         Select Case pMaplexOverposterProperties.ConnectionType
                             Case esriMaplexConnectionType.esriMaplexMinimizeLabels
@@ -570,49 +567,6 @@ Module modReadMxd
                             Next
                         Next
                     End If 'dictionaries
-                    If m_Version >= 101 Then
-                        mxdProps.pKeyNumberGroups = pMaplexOverposterProperties2.KeyNumberGroups
-                        If mxdProps.pKeyNumberGroups.GroupCount Then
-                            Dim pKeyNumberGroup As IMaplexKeyNumberGroup
-                            sw.WriteLine(InsertTabs(2) & mxdProps.pKeyNumberGroups.GroupCount & " key number groups found:")
-                            For i = 0 To mxdProps.pKeyNumberGroups.GroupCount - 1
-                                pKeyNumberGroup = mxdProps.pKeyNumberGroups.GetGroup(i)
-                                sw.WriteLine(InsertTabs(3) & "Group name: " & pKeyNumberGroup.Name)
-                                Select Case pKeyNumberGroup.HorizontalAlignment
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentAuto
-                                        sw.WriteLine(InsertTabs(4) & "Auto alignment")
-                                        mxdProps.bKNAuto = True
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentLeft
-                                        sw.WriteLine(InsertTabs(4) & "Left alignment")
-                                        mxdProps.bKNLeft = True
-                                    Case esriMaplexKeyNumberHorizontalAlignment.esriMaplexKeyNumberHorizontalAlignmentRight
-                                        sw.WriteLine(InsertTabs(4) & "Right alignment")
-                                        mxdProps.bKNRight = True
-                                    Case Else
-                                        sw.WriteLine(InsertTabs(4) & "Error: Alignment not set")
-                                End Select
-                                Select Case pKeyNumberGroup.NumberResetType
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeAlways
-                                        sw.WriteLine(InsertTabs(4) & "Always reset")
-                                        mxdProps.bKNAlwaysReset = True
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeMaybe
-                                        sw.WriteLine(InsertTabs(4) & "May reset")
-                                        mxdProps.bKNMayReset = True
-                                    Case esriMaplexKeyNumberResetType.esriMaplexKeyNumberResetTypeNone
-                                        sw.WriteLine(InsertTabs(4) & "No reset")
-                                        mxdProps.bKNNoReset = True
-                                    Case Else
-                                        sw.WriteLine(InsertTabs(4) & "Error: Reset not set")
-                                End Select
-                                sw.WriteLine(InsertTabs(4) & "Delimiter: " & pKeyNumberGroup.DelimiterCharacter)
-                                If pKeyNumberGroup.DelimiterCharacter <> "." Then mxdProps.bKNDelimiter = True
-                                sw.WriteLine(InsertTabs(4) & "Min lines: " & pKeyNumberGroup.MinimumNumberOfLines)
-                                If pKeyNumberGroup.MinimumNumberOfLines <> 2 Then mxdProps.bKNMin = True
-                                sw.WriteLine(InsertTabs(4) & "Max lines: " & pKeyNumberGroup.MaximumNumberOfLines)
-                                If pKeyNumberGroup.MaximumNumberOfLines <> 20 Then mxdProps.bKNMax = True
-                            Next
-                        End If 'key number groups
-                    End If '10.1
                 End If 'mle
 
                 'bookmarks
@@ -663,7 +617,31 @@ Module modReadMxd
                 sw.WriteLine("")
             End If
 
-            If bReadSymbols Then sw.WriteLine(String.Format("End Map #{0}", pMapDocument.MapCount - lMapCount + 1))
+            'list tables
+            Dim pTableColl As IStandaloneTableCollection = CType(pMap, IStandaloneTableCollection)
+            Dim pTable As ITable
+            Dim pDataset As IDataset
+            For i = 0 To pTableColl.StandaloneTableCount - 1
+                pTable = pTableColl.StandaloneTable(i)
+                pDataset = CType(pTable, IDataset)
+                sw.WriteLine(InsertTabs(1) & "Table " & i + 1 & "/" & pTableColl.StandaloneTableCount)
+                If pDataset Is Nothing Then
+                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read table details")
+                    sw.WriteLine("")
+                    Continue For
+                End If
+                sw.WriteLine(InsertTabs(2) & "Name: " & pDataset.Name)
+                Try
+                    sw.WriteLine(InsertTabs(2) & "Data source: " & pDataset.Workspace.PathName)
+                    mxdProps.sDataSources(mxdProps.lDataSources) = pDataset.Workspace.PathName
+                    AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
+                Catch ex As Exception
+                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read data source name")
+                End Try
+                sw.WriteLine("")
+            Next
+
+            sw.WriteLine(String.Format("End Map #{0}", pMapDocument.MapCount - lMapCount + 1))
             If mxdProps.bLayoutView Or bAllLayers Then
                 'layout view - next frame
                 If lMapCount > 1 Then
@@ -680,8 +658,9 @@ Module modReadMxd
         If bReadSymbols Then
             WriteSymbolSummary()
             If bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
-        Else
-            WritePropSummary()
+        End If
+        If bReadLabels Then
+            WriteLabelSummary()
             If mxdProps.bMLE And bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
         End If
 
@@ -738,11 +717,11 @@ Module modReadMxd
     End Sub
 
     'Sum up all the properties used in this map document
-    Private Sub WritePropSummary()
+    Private Sub WriteLabelSummary()
 
         Dim sTmp As String
         Dim i As Integer
-        sw.WriteLine(vbCrLf & "Summary:" & vbCrLf & "Polygons:")
+        sw.WriteLine(vbCrLf & "Label Properties Summary:" & vbCrLf & "Polygons:")
         If mxdProps.bPolyHorz Then sw.WriteLine(InsertTabs(1) & "Polygon horizontal")
         If mxdProps.bPolyStr Then sw.WriteLine(InsertTabs(1) & "Polygon straight")
         If mxdProps.bPolyCurv Then sw.WriteLine(InsertTabs(1) & "Polygon curved")
@@ -1009,7 +988,7 @@ Module modReadMxd
 
         'Dim sTmp As String
         'Dim i As Integer
-        sw.WriteLine(vbCrLf & "Summary:")
+        sw.WriteLine(vbCrLf & "Symbol Properties Summary:")
         If mxdProps.bBarChart Then sw.WriteLine(InsertTabs(1) & "Bar chart")
         If mxdProps.bStackedChart Then sw.WriteLine(InsertTabs(1) & "Stacked chart")
         If mxdProps.bPieChart Then sw.WriteLine(InsertTabs(1) & "Pie chart")

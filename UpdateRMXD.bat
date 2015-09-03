@@ -2,7 +2,7 @@
 @echo off
 set GETVER=getver.py
 
-for /f %%a in ('!GETVER! "C:\Program Files (x86)\ArcGIS\Desktop10.2\bin\afcore.dll"') do (
+for /f %%a in ('!GETVER! "C:\Program Files (x86)\ArcGIS\Desktop10.0\bin\afcore.dll"') do (
   for /f "tokens=1,2 delims=." %%b in ('echo %%a') do (
     set HOMEBUILD=%%b.%%c
   )
@@ -10,11 +10,11 @@ for /f %%a in ('!GETVER! "C:\Program Files (x86)\ArcGIS\Desktop10.2\bin\afcore.d
 if "!HOMEBUILD!" equ "" goto :end
 if "!HOMEBUILD!" equ "?." goto :end
 
-if exist %~dp0bin\x64\Release (
+if exist "%~dp0bin\x64\Release" (
 	set SRCDIR=%~dp0bin\x64\Release
-) else if exist %~dp0bin\x86\Release (
+) else if exist "%~dp0bin\x86\Release" (
 	set SRCDIR=%~dp0bin\x86\Release
-) else if exist %~dp0bin\Release (
+) else if exist "%~dp0bin\Release" (
 	set SRCDIR=%~dp0bin\Release
 ) else (
 	echo source dirs %~dp0bin\...\Release not found
@@ -22,7 +22,7 @@ if exist %~dp0bin\x64\Release (
 )
 
 echo copying Latest ReadMxd to:
-call :copyRMXD D: Projects\ReadMxd\dist
+call :copyRMXD "%~dp0dist"
 
 :end
 echo.
@@ -35,7 +35,7 @@ pause
 goto :eof
 
 :copyRMXD
-set DEST=%1\%2
+set DEST=%1
 echo.
 echo !DEST!
 if not exist !DEST! (
