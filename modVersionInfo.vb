@@ -102,8 +102,10 @@ Public Class ArcInit
         GetArcDir = ""
         'have a few goes at getting install dir, depending on version. use c:\arcgis if can't find it
         For Each esriKey As String In {"Wow6432Node\ESRI", "ESRI"}
+            '10.3
+            GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.3", esriKey), "InstallDir", Nothing)
             '10.2
-            GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.2", esriKey), "InstallDir", Nothing)
+            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.2", esriKey), "InstallDir", Nothing)
             '10.1
             If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.1", esriKey), "InstallDir", Nothing)
             '10

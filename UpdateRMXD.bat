@@ -1,14 +1,5 @@
 
 @echo off
-set GETVER=getver.py
-
-for /f %%a in ('!GETVER! "C:\Program Files (x86)\ArcGIS\Desktop10.2\bin\afcore.dll"') do (
-  for /f "tokens=1,2 delims=." %%b in ('echo %%a') do (
-    set HOMEBUILD=%%b.%%c
-  )
-)
-if "!HOMEBUILD!" equ "" goto :end
-if "!HOMEBUILD!" equ "?." goto :end
 
 if exist %~dp0bin\x64\Release (
 	set SRCDIR=%~dp0bin\x64\Release
@@ -26,9 +17,6 @@ call :copyRMXD D:\Projects\ReadMxd\dist
 
 :end
 echo.
-set GETVER=
-set HOMEBUILD=
-set BUILD=
 set SRCDIR=
 pause
 goto :eof
