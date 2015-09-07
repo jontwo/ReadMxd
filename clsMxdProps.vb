@@ -71,6 +71,8 @@ Public Class clsMxdProps
     'symbols
     Public bPieChart, bBarChart, bStackedChart, bSimpleFill, bGradientFill, bPictureFill, bMarkerFill, bLineFill As Boolean
     Public bFixedSize, bChartLeaders, b3DChart, bChartOverlap, bBarOrient, bColumnOrient, bGeogOrient, bArithOrient As Boolean
+    Public bColorRamp, bRasterClassify, bRasterRGB, bRasterUnique, bRasterDiscrete, bRasterStretch As Boolean
+    'TODO more symbols on summary
 
     'map props
     Public bGeographic, bRefScale, bProjected, bClipExtent As Boolean

@@ -21,6 +21,7 @@ Module ModFunctions
         Dim pGraphicsLayer As IGraphicsLayer
         Dim pFL As IFeatureLayer2
         Dim pGeoFL As IGeoFeatureLayer
+        Dim pRasterLayer As IRasterLayer
         Dim pDataLayer As IDataLayer2
         Dim pDatasetName As IDatasetName
         Dim pWSName As IWorkspaceName
@@ -61,7 +62,7 @@ Module ModFunctions
                     pWSName = pDatasetName.WorkspaceName
                     mxdProps.sDataSources(mxdProps.lDataSources) = pWSName.PathName
                     sw.WriteLine(InsertTabs(lTabLevel) & "Data source: " & mxdProps.sDataSources(mxdProps.lDataSources))
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Feature class: " & pDatasetName.Name)
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Dataset name: " & pDatasetName.Name)
                     AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
 
                     'find datasource type
@@ -350,6 +351,48 @@ Module ModFunctions
                 End If
             End If 'read symbols
             '********************
+        ElseIf TypeOf pLayer Is IRasterLayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster layer")
+            pRasterLayer = pLayer
+
+            sw.WriteLine(InsertTabs(lTabLevel) & "Columns and Rows: " & pRasterLayer.ColumnCount & ", " & pRasterLayer.RowCount)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Band count: " & pRasterLayer.BandCount)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Pyramids: " & pRasterLayer.PyramidPresent)
+
+            If Not pRasterLayer.Raster Is Nothing Then
+                Dim pRas As IRaster
+                pRas = pRasterLayer.Raster
+                Select Case pRas.ResampleMethod
+                    Case rstResamplingTypes.RSP_Average
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Average")
+                    Case rstResamplingTypes.RSP_CubicConvolution
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Cubic convolution")
+                    Case rstResamplingTypes.RSP_BilinearInterpolation
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Bilinear interpolation")
+                    Case rstResamplingTypes.RSP_BilinearInterpolationPlus
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Bilinear interpolation plus")
+                    Case rstResamplingTypes.RSP_Majority
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Majority")
+                    Case rstResamplingTypes.RSP_NearestNeighbor
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Nearest neighbour")
+                    Case Else
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: ************ TODO ************")
+                End Select
+            End If
+            If bReadSymbols Then
+                If TypeOf pRasterLayer.Renderer Is ILevelRenderer Then
+                    pSymbolLevels = pRasterLayer
+                    If pSymbolLevels.UseSymbolLevels Then
+                        bSymbolLevels = True
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Use symbol levels")
+                    Else
+                        If bSymbolLevels Then sw.WriteLine(InsertTabs(lTabLevel) & "Use symbol levels (inherited)")
+                    End If
+                End If
+                If Not pRasterLayer.Renderer Is Nothing Then GetRasterRendererProps(pRasterLayer.Renderer, lTabLevel + 1, bSymbolLevels)
+            End If
+
+            '********************
         ElseIf TypeOf pLayer Is IGroupLayer Then
             'get sublayers
             pCompLayer = pLayer
@@ -377,6 +420,114 @@ Module ModFunctions
             End If
 
         End If 'layer type
+    End Sub
+
+    Sub GetRasterRendererProps(ByRef pRR As IRasterRenderer, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
+        sw.Flush()
+        Dim sTmp As String
+        Dim i As Integer
+        Dim pClassCRRend As IRasterClassifyColorRampRenderer
+        '? Dim pColormapRend As IRasterColormapRenderer
+        Dim pDiscreteColRend As IRasterDiscreteColorRenderer
+        Dim pRGBRend As IRasterRGBRenderer2
+        Dim pStretchCRRend As IRasterStretchColorRampRenderer
+        Dim pRasterStretch2 As IRasterStretch2
+        Dim pRasterStretch3 As IRasterStretch3
+        Dim pUVR As IRasterUniqueValueRenderer
+        If TypeOf pRR Is IRasterClassifyColorRampRenderer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster Classify Color Ramp Renderer")
+            mxdProps.bRasterClassify = True
+            pClassCRRend = pRR
+            sw.WriteLine(InsertTabs(lTabLevel) & "Class count: " & pClassCRRend.ClassCount)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Class field: " & pClassCRRend.ClassField)
+            For i = 0 To pClassCRRend.ClassCount - 1
+                If pClassCRRend.Description(i) <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Description: " & pClassCRRend.Description(i))
+                If pClassCRRend.Label(i) <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Label: " & pClassCRRend.Label(i))
+                GetSymbolProps(pClassCRRend.Symbol(i), lTabLevel + 1, bSymbolLevels)
+            Next
+        ElseIf TypeOf pRR Is IRasterDiscreteColorRenderer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster Discrete Color Renderer")
+            mxdProps.bRasterDiscrete = True
+            pDiscreteColRend = pRR
+            sw.WriteLine(InsertTabs(lTabLevel) & "Number of colors: " & pDiscreteColRend.NumColors)
+        ElseIf TypeOf pRR Is IRasterRGBRenderer Or TypeOf pRR Is IRasterRGBRenderer2 Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster RGB Renderer")
+            mxdProps.bRasterRGB = True
+            pRGBRend = pRR
+            sw.WriteLine(InsertTabs(lTabLevel) & "Red band index: " & pRGBRend.RedBandIndex & ", use: " & pRGBRend.UseRedBand)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Green band index: " & pRGBRend.GreenBandIndex & ", use: " & pRGBRend.UseGreenBand)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Blue band index: " & pRGBRend.BlueBandIndex & ", use: " & pRGBRend.UseBlueBand)
+            sw.WriteLine(InsertTabs(lTabLevel) & "Alpha band index: " & pRGBRend.AlphaBandIndex & ", use: " & pRGBRend.UseAlphaBand)
+            ' TODO raster stretch is a coclass so make a function to reuse stretch stuff below
+        ElseIf TypeOf pRR Is IRasterStretchColorRampRenderer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster Stretch Color Ramp Renderer")
+            mxdProps.bRasterStretch = True
+            pStretchCRRend = pRR
+            sw.WriteLine(InsertTabs(lTabLevel) & "Band index: " & pStretchCRRend.BandIndex)
+            If pStretchCRRend.ColorScheme <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Color scheme: " & pStretchCRRend.ColorScheme)
+            If pStretchCRRend.LabelHigh <> "" Or pStretchCRRend.LabelMedium <> "" Or pStretchCRRend.LabelLow <> "" Then
+                sw.WriteLine(InsertTabs(lTabLevel) & "Labels:")
+            End If
+            If pStretchCRRend.LabelHigh <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelHigh)
+            If pStretchCRRend.LabelMedium <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelMedium)
+            If pStretchCRRend.LabelLow <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelLow)
+            GetColorRamp(pStretchCRRend.ColorRamp, lTabLevel, bSymbolLevels)
+            pRasterStretch2 = pStretchCRRend
+            pRasterStretch3 = pStretchCRRend
+            If pRasterStretch2.Background Then
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Background color (RGB): " & GetRGB(pRasterStretch2.BackgroundColor))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Background color (CMYK): " & GetCMYK(pRasterStretch2.BackgroundColor))
+            End If
+            Select Case pRasterStretch2.StretchType
+                Case esriRasterStretchTypesEnum.esriRasterStretch_StandardDeviations
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Standard deviations")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_HistogramEqualize
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Histogram equalize")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_HistogramSpecification
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Histogram specification")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_MinimumMaximum
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Minimum maximum")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_DefaultFromSource
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Default")
+                Case Else
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Other ***** TODO *****")  ' TODO fill in others
+            End Select
+            If pRasterStretch3.UseGamma Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Gamma: " & pRasterStretch3.GammaValue)
+        ElseIf TypeOf pRR Is IRasterUniqueValueRenderer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster Unique Value Renderer")
+            mxdProps.bRasterUnique = True
+            pUVR = pRR
+            Dim iHeading As Integer
+            Dim iClass As Integer
+            If pUVR.ColorScheme <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Colour Scheme: " & pUVR.ColorScheme)
+            If pUVR.UseDefaultSymbol Then
+                sw.WriteLine(InsertTabs(lTabLevel) & "Use Default Symbol")
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Label: " & pUVR.DefaultLabel)
+                GetSymbolProps(pUVR.DefaultSymbol, lTabLevel + 1, bSymbolLevels)
+            End If
+            sw.WriteLine(InsertTabs(lTabLevel) & "Number of headings: " & pUVR.HeadingCount)
+            For iHeading = 0 To pUVR.HeadingCount - 1
+                sw.WriteLine(InsertTabs(lTabLevel) & "Heading " & iHeading + 1 & "(" & pUVR.Heading(iHeading) & "):")
+                sw.WriteLine(InsertTabs(lTabLevel) & "Number of classes: " & pUVR.ClassCount(iHeading))
+                For iClass = 0 To pUVR.ClassCount(iHeading) - 1
+                    GetSymbolProps(pUVR.Symbol(iHeading, iClass), lTabLevel + 1, bSymbolLevels)
+                    ' TODO value objects
+                    'sw.WriteLine(InsertTabs(lTabLevel) & "Number of values: " & pUVR.ValueCount(iHeading, iClass))
+                    'For i = 0 To pUVR.ValueCount(iHeading, iClass) - 1
+                    '    sw.WriteLine(InsertTabs(lTabLevel) & "Value " & i + 1 & "/" & pUVR.ValueCount & _
+                    '                 ": " & pUVR.Value(i) & " Label: " & pUVR.Label(pUVR.Value(i)))
+                    '    'VB.NET won't let you pass the symbol in if it is nothing
+                    '    If pUVR.Symbol(pUVR.Value(i)) Is Nothing Then
+                    '        GetSymbolProps(Nothing, lTabLevel + 1, bSymbolLevels)
+                    '    Else
+                    '        GetSymbolProps(pUVR.Symbol(pUVR.Value(i)), lTabLevel + 1, bSymbolLevels)
+                    '    End If
+                    'Next
+                Next
+            Next
+        Else
+            sw.WriteLine(InsertTabs(lTabLevel) & "Raster Renderer ************ TODO ************")
+        End If
     End Sub
 
     Sub GetRendererProps(ByRef pFR As IFeatureRenderer, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
@@ -559,6 +710,64 @@ Module ModFunctions
         '  End If
 
     End Sub
+
+    Sub GetColorRamp(ByRef pRamp As IColorRamp, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
+        Dim i As Integer
+        Dim pAlgCR As IAlgorithmicColorRamp
+        Dim pMultipartCR As IMultiPartColorRamp
+        Dim pPresetCR As IPresetColorRamp
+        Dim pRandomCR As IRandomColorRamp
+        If Not pRamp Is Nothing Then
+            mxdProps.bColorRamp = True
+            sw.WriteLine(InsertTabs(lTabLevel) & "Color Ramp:")
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Name: " & pRamp.Name)
+            If pRamp.Size And Not TypeOf pRamp Is IAlgorithmicColorRamp Then
+                ' do not list all colors for algorithmic ramp, just from and to
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Size: " & pRamp.Size)
+                For i = 0 To pRamp.Size - 1
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Color " & i & " (RGB): " & GetRGB(pRamp.Color(i)))
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Color " & i & " (CMYK): " & GetCMYK(pRamp.Color(i)))
+                Next
+            End If
+            If TypeOf pRamp Is IAlgorithmicColorRamp Then
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Algorithmic Color Ramp")
+                pAlgCR = pRamp
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Algorithm: " & GetColorRampAlgorithm(pAlgCR.Algorithm))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "From color (RGB): " & GetRGB(pAlgCR.FromColor))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "To color (CMYK): " & GetCMYK(pAlgCR.ToColor))
+            ElseIf TypeOf pRamp Is IMultiPartColorRamp Then
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Multipart Color Ramp")
+                pMultipartCR = pRamp
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Number of ramps: " & pMultipartCR.NumberOfRamps)
+                For i = 0 To pMultipartCR.NumberOfRamps - 1
+                    Dim tempRamp As IColorRamp
+                    tempRamp = pMultipartCR.Ramp(i)  ' get ramp before passing it in or it starts adding new ramps
+                    GetColorRamp(tempRamp, lTabLevel + 1, bSymbolLevels)
+                Next
+            ElseIf TypeOf pRamp Is IPresetColorRamp Then
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Preset Color Ramp")
+                pPresetCR = pRamp
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Number of preset colors: " & pPresetCR.NumberOfPresetColors)
+                For i = 0 To pPresetCR.NumberOfPresetColors - 1
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Preset color " & i & " (RGB): " & GetRGB(pPresetCR.PresetColor(i)))
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Preset color " & i & " (CMYK): " & GetCMYK(pPresetCR.PresetColor(i)))
+                Next
+            ElseIf TypeOf pRamp Is IRandomColorRamp Then
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Random Color Ramp")
+                pRandomCR = pRamp
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Start Hue: " & pRandomCR.StartHue)
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "End Hue: " & pRandomCR.EndHue)
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Min Saturation: " & pRandomCR.MinSaturation)
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Max Saturation: " & pRandomCR.MaxSaturation)
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Min Value: " & pRandomCR.MinValue)
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Max Value: " & pRandomCR.MaxValue)
+                If pRandomCR.UseSeed Then
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Seed: " & pRandomCR.Seed)
+                End If
+            End If
+        End If
+    End Sub
+
     Sub GetSymbolProps(ByRef pSym As ESRI.ArcGIS.Display.ISymbol, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
         sw.Flush()
 
@@ -592,7 +801,7 @@ Module ModFunctions
         Dim pLineFillSym As ESRI.ArcGIS.Display.ILineFillSymbol
         Dim pMarkFillSym As ESRI.ArcGIS.Display.IMarkerFillSymbol
         Dim pPicFillSym As ESRI.ArcGIS.Display.IPictureFillSymbol
-'        Dim pTexFillSym As ESRI.ArcGIS.Analyst3D.ITextureFillSymbol
+        '        Dim pTexFillSym As ESRI.ArcGIS.Analyst3D.ITextureFillSymbol
         Dim pLineSym As ESRI.ArcGIS.Display.ILineSymbol
         Dim pSimpLineSym As ESRI.ArcGIS.Display.ISimpleLineSymbol
         Dim pMLyrLineSym As ESRI.ArcGIS.Display.IMultiLayerLineSymbol
@@ -806,21 +1015,7 @@ Module ModFunctions
                 mxdProps.bGradientFill = True
                 GetFillSymbolProps(pFillSym, lTabLevel, bSymbolLevels)
                 If pGradFillSym.IntervalCount <> 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Interval Count: " & pGradFillSym.IntervalCount)
-                If Not pGradFillSym.ColorRamp Is Nothing Then
-                    'Dim pEnumColors As IEnumColors
-                    'Dim pColor As IColor
-                    pColorRamp = pGradFillSym.ColorRamp
-                    sw.WriteLine(InsertTabs(lTabLevel) & "Color Ramp:")
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Name: " & pColorRamp.Name)
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Size: " & pColorRamp.Size)
-                    'Set pEnumColors = pColorRamp.Colors
-                    'pEnumColors.Reset
-                    'Set pColor = pEnumColors.Next
-                    'While Not pColor Is Nothing
-                    '  Print #InsertTabs(lTabLevel + 1) & "Color: " & GetColor(pColor)
-                    '  Set pColor = pEnumColors.Next
-                    'Wend
-                End If
+                GetColorRamp(pGradFillSym.ColorRamp, lTabLevel, bSymbolLevels)
                 If Math.Abs(pGradFillSym.GradientAngle) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Gradient Angle: " & pGradFillSym.GradientAngle)
                 If Math.Abs(pGradFillSym.GradientPercentage) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Gradient Percentage: " & pGradFillSym.GradientPercentage)
                 Select Case pGradFillSym.Style
@@ -887,6 +1082,9 @@ Module ModFunctions
                 sw.WriteLine(InsertTabs(lTabLevel) & "Texture Fill Symbol")
                 GetFillSymbolProps(pFillSym, lTabLevel, bSymbolLevels)
                 sw.WriteLine(InsertTabs(lTabLevel) & "************ TODO ************")
+            ElseIf TypeOf pFillSym Is IColorSymbol Then
+                sw.WriteLine(InsertTabs(lTabLevel) & "Color Symbol")
+                GetFillSymbolProps(pFillSym, lTabLevel, bSymbolLevels)
             Else
                 sw.WriteLine("***** Other fill symbol *****")
                 GetFillSymbolProps(pFillSym, lTabLevel, bSymbolLevels)
@@ -1007,8 +1205,10 @@ Module ModFunctions
             sw.WriteLine(InsertTabs(lTabLevel) & "Color (RGB): " & GetRGB(pFillSym.Color))
             sw.WriteLine(InsertTabs(lTabLevel) & "Color (CMYK): " & GetCMYK(pFillSym.Color))
         End If
-        sw.WriteLine(InsertTabs(lTabLevel) & "Outline: ")
-        GetSymbolProps(pFillSym.Outline, lTabLevel + 1, bSymbolLevels)
+        If Not TypeOf pFillSym Is IColorSymbol Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Outline: ")
+            GetSymbolProps(pFillSym.Outline, lTabLevel + 1, bSymbolLevels)
+        End If
     End Sub
 
     'inherited properties on all types of line symbol
@@ -2712,6 +2912,19 @@ Module ModFunctions
                 GetLineCalloutStyle = "Underline"
             Case Else
                 GetLineCalloutStyle = "Unknown style"
+        End Select
+    End Function
+
+    Function GetColorRampAlgorithm(ByVal algorithm As esriColorRampAlgorithm) As String
+        Select Case (algorithm)
+            Case esriColorRampAlgorithm.esriCIELabAlgorithm
+                GetColorRampAlgorithm = "CIELab"
+            Case esriColorRampAlgorithm.esriHSVAlgorithm
+                GetColorRampAlgorithm = "HSV"
+            Case esriColorRampAlgorithm.esriLabLChAlgorithm
+                GetColorRampAlgorithm = "LabLCh"
+            Case Else
+                GetColorRampAlgorithm = "Unknown algorithm"
         End Select
     End Function
 
