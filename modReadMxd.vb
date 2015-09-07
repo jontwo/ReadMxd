@@ -197,7 +197,8 @@ Module modReadMxd
                 GetLayerProps(gxLayerCls.Layer(), 2)
             End If
             sw.WriteLine("")
-            WriteLabelSummary()
+            If bReadLabels Then WriteLabelSummary()
+            If bReadSymbols Then WriteSymbolSummary()
             Exit Sub
         End If
 
@@ -1041,6 +1042,12 @@ Module modReadMxd
         'Dim sTmp As String
         'Dim i As Integer
         sw.WriteLine(vbCrLf & "Symbol Properties Summary:")
+        If mxdProps.bColorRamp Then sw.WriteLine(InsertTabs(1) & "Color ramp")
+        If mxdProps.bRasterClassify Then sw.WriteLine(InsertTabs(1) & "Raster classify color ramp renderer")
+        If mxdProps.bRasterStretch Then sw.WriteLine(InsertTabs(1) & "Raster stretch color ramp renderer")
+        If mxdProps.bRasterDiscrete Then sw.WriteLine(InsertTabs(1) & "Raster discrete color renderer")
+        If mxdProps.bRasterUnique Then sw.WriteLine(InsertTabs(1) & "Raster unique value renderer")
+        If mxdProps.bRasterRGB Then sw.WriteLine(InsertTabs(1) & "Raster RGB renderer")
         If mxdProps.bBarChart Then sw.WriteLine(InsertTabs(1) & "Bar chart")
         If mxdProps.bStackedChart Then sw.WriteLine(InsertTabs(1) & "Stacked chart")
         If mxdProps.bPieChart Then sw.WriteLine(InsertTabs(1) & "Pie chart")
