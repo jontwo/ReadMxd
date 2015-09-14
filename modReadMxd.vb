@@ -193,7 +193,10 @@ Module modReadMxd
                 GetLayerProps(gxLayerCls.Layer(), 2)
             End If
             sw.WriteLine("")
-            WriteLabelSummary()
+            If bReadLabels Then WriteLabelSummary()
+            If bReadSymbols Then WriteSymbolSummary()
+            WriteGeneralSummary()
+            sw.WriteLine(vbCrLf & "OK")
             Exit Sub
         End If
 
@@ -663,6 +666,8 @@ Module modReadMxd
             WriteLabelSummary()
             If mxdProps.bMLE And bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
         End If
+        WriteGeneralSummary()
+        sw.WriteLine(vbCrLf & "OK")
 
     End Sub
 
@@ -937,32 +942,42 @@ Module modReadMxd
         sw.WriteLine(InsertTabs(1) & "No of anno layers: " & mxdProps.lAnnoLayers)
         sw.WriteLine(InsertTabs(1) & "No of barriers: " & mxdProps.lBarriers)
         If mxdProps.bFast Then sw.WriteLine(InsertTabs(1) & "Fast placement")
-        If mxdProps.bLayoutView And mxdProps.lMapCount > 1 Then
-            For i = 0 To mxdProps.lMapCount - 1
-                sw.WriteLine(InsertTabs(1) & "Map #" & i + 1 & ":")
-                sw.WriteLine(InsertTabs(2) & "Spatial Reference: " & mxdProps.sSRef(i))
-                sw.WriteLine(InsertTabs(2) & "Map Units: " & mxdProps.sMapUnits(i))
-            Next
-        ElseIf Not bLyrFile Then
-            sw.WriteLine(InsertTabs(1) & "Map Units: " & mxdProps.sMapUnits(0))
-            sw.WriteLine(InsertTabs(1) & "Spatial Reference: " & mxdProps.sSRef(0))
-            If mxdProps.lMapCount > 1 Then sw.WriteLine(InsertTabs(1) & "Multiple dataframes")
-        End If
-        If mxdProps.bGeographic Then sw.WriteLine(InsertTabs(2) & "Geographic coordinate system")
-        If mxdProps.bProjected Then sw.WriteLine(InsertTabs(2) & "Projected coordinate system")
-        If mxdProps.bRefScale Then sw.WriteLine(InsertTabs(1) & "Reference scale")
-        If mxdProps.bFixedExtent Then sw.WriteLine(InsertTabs(1) & "Map Frame Fixed Extent")
-        If mxdProps.bFixedScale Then sw.WriteLine(InsertTabs(1) & "Map Frame Fixed Scale")
-        If mxdProps.bAutoExtent Then sw.WriteLine(InsertTabs(1) & "Map Frame Automatic Extent")
-        If mxdProps.bClipExtent Then
-            sw.WriteLine(InsertTabs(1) & "Clip extent")
-            If mxdProps.bClipToShape Then sw.WriteLine(InsertTabs(2) & "Clip to shape")
-            If mxdProps.bExcludeLayers Then sw.WriteLine(InsertTabs(2) & "Exclude layers")
-        End If
-        If mxdProps.bLayoutView Then sw.WriteLine(InsertTabs(1) & "Layout view") Else _
-            sw.WriteLine(InsertTabs(1) & "Data view")
         sw.WriteLine("No of label classes: " & mxdProps.lLabelClassCount)
         sw.WriteLine("No of label classes in anno layers: " & mxdProps.lAnnoLabelClassCount)
+        If mxdProps.bMLE Then sw.WriteLine("MLE")
+        If mxdProps.bSLE Then sw.WriteLine("SLE")
+
+    End Sub
+
+    Private Sub WriteGeneralSummary()
+
+        Dim i As Integer
+        sw.WriteLine(vbCrLf & "General Properties Summary:")
+        If mxdProps.bLayoutView Then sw.WriteLine("Layout view") Else sw.WriteLine("Data view")
+        If mxdProps.bLayoutView And mxdProps.lMapCount > 1 Then
+            For i = 0 To mxdProps.lMapCount - 1
+                sw.WriteLine("Map #" & i + 1 & ":")
+                sw.WriteLine(InsertTabs(1) & "Spatial Reference: " & mxdProps.sSRef(i))
+                If mxdProps.bGeographic Then sw.WriteLine(InsertTabs(1) & "Geographic coordinate system")
+                If mxdProps.bProjected Then sw.WriteLine(InsertTabs(1) & "Projected coordinate system")
+                sw.WriteLine(InsertTabs(1) & "Map Units: " & mxdProps.sMapUnits(i))
+            Next
+        ElseIf Not bLyrFile Then
+            If mxdProps.lMapCount > 1 Then sw.WriteLine("Multiple dataframes")
+            sw.WriteLine("Spatial Reference: " & mxdProps.sSRef(0))
+            If mxdProps.bGeographic Then sw.WriteLine("Geographic coordinate system")
+            If mxdProps.bProjected Then sw.WriteLine("Projected coordinate system")
+            sw.WriteLine("Map Units: " & mxdProps.sMapUnits(0))
+        End If
+        If mxdProps.bRefScale Then sw.WriteLine("Reference scale")
+        If mxdProps.bFixedExtent Then sw.WriteLine("Map Frame Fixed Extent")
+        If mxdProps.bFixedScale Then sw.WriteLine("Map Frame Fixed Scale")
+        If mxdProps.bAutoExtent Then sw.WriteLine("Map Frame Automatic Extent")
+        If mxdProps.bClipExtent Then
+            sw.WriteLine("Clip extent")
+            If mxdProps.bClipToShape Then sw.WriteLine(InsertTabs(1) & "Clip to shape")
+            If mxdProps.bExcludeLayers Then sw.WriteLine(InsertTabs(1) & "Exclude layers")
+        End If
         If mxdProps.lDataSources > 1 Then
             sw.WriteLine("Data sources:")
             For i = 0 To mxdProps.lDataSources - 1
@@ -971,16 +986,15 @@ Module modReadMxd
         Else
             sw.WriteLine("Data source: " & mxdProps.sDataSources(0))
         End If
-        If mxdProps.bSHP Then sw.WriteLine(InsertTabs(1) & "Shapefile")
-        If mxdProps.bFGDB Then sw.WriteLine(InsertTabs(1) & "File Geodatabase")
-        If mxdProps.bPGDB Then sw.WriteLine(InsertTabs(1) & "Personal Geodatabase")
-        If mxdProps.bSDE Then sw.WriteLine(InsertTabs(1) & "SDE")
-        If mxdProps.bCoverage Then sw.WriteLine(InsertTabs(1) & "Coverage")
+        If mxdProps.bSHP Then sw.WriteLine("Shapefile")
+        If mxdProps.bFGDB Then sw.WriteLine("File Geodatabase")
+        If mxdProps.bPGDB Then sw.WriteLine("Personal Geodatabase")
+        If mxdProps.bSDE Then sw.WriteLine("SDE")
+        If mxdProps.bCoverage Then sw.WriteLine("Coverage")
         If mxdProps.bRelPaths Then sw.WriteLine("Relative paths")
-        If mxdProps.bQualifiedNames Then sw.WriteLine("Qualified names")
         If mxdProps.bAbsPaths Then sw.WriteLine("Absolute paths")
-        If mxdProps.bMLE Then sw.WriteLine("MLE")
-        If mxdProps.bSLE Then sw.WriteLine("SLE")
+        If mxdProps.bQualifiedNames Then sw.WriteLine("Qualified names")
+
     End Sub
 
     'Sum up all the symbols used in this map document
@@ -989,24 +1003,30 @@ Module modReadMxd
         'Dim sTmp As String
         'Dim i As Integer
         sw.WriteLine(vbCrLf & "Symbol Properties Summary:")
-        If mxdProps.bBarChart Then sw.WriteLine(InsertTabs(1) & "Bar chart")
-        If mxdProps.bStackedChart Then sw.WriteLine(InsertTabs(1) & "Stacked chart")
-        If mxdProps.bPieChart Then sw.WriteLine(InsertTabs(1) & "Pie chart")
-        If mxdProps.b3DChart Then sw.WriteLine(InsertTabs(1) & "3D chart")
-        If mxdProps.bChartOverlap Then sw.WriteLine(InsertTabs(1) & "Chart overlap")
-        If mxdProps.bFixedSize Then sw.WriteLine(InsertTabs(1) & "Fixed size")
-        If mxdProps.bChartLeaders Then sw.WriteLine(InsertTabs(1) & "Leaders")
-        If mxdProps.bSimpleFill Then sw.WriteLine(InsertTabs(1) & "Simple fill")
-        If mxdProps.bLineFill Then sw.WriteLine(InsertTabs(1) & "Line fill")
-        If mxdProps.bMarkerFill Then sw.WriteLine(InsertTabs(1) & "Marker fill")
-        If mxdProps.bGradientFill Then sw.WriteLine(InsertTabs(1) & "Gradient fill")
-        If mxdProps.bPictureFill Then sw.WriteLine(InsertTabs(1) & "Picture fill")
-        If mxdProps.bBarOrient Then sw.WriteLine(InsertTabs(1) & "Bar orientation")
-        If mxdProps.bColumnOrient Then sw.WriteLine(InsertTabs(1) & "Column orientation")
-        If mxdProps.bArithOrient Then sw.WriteLine(InsertTabs(1) & "Arithmetic orientation")
-        If mxdProps.bGeogOrient Then sw.WriteLine(InsertTabs(1) & "Geographic orientation")
-        sw.WriteLine("OK")
-    End Sub
+        If mxdProps.bColorRamp Then sw.WriteLine("Color ramp")
+        If mxdProps.bRasterClassify Then sw.WriteLine("Raster classify color ramp renderer")
+        If mxdProps.bRasterStretch Then sw.WriteLine("Raster stretch color ramp renderer")
+        If mxdProps.bRasterDiscrete Then sw.WriteLine("Raster discrete color renderer")
+        If mxdProps.bRasterUnique Then sw.WriteLine("Raster unique value renderer")
+        If mxdProps.bRasterRGB Then sw.WriteLine("Raster RGB renderer")
+        If mxdProps.bBarChart Then sw.WriteLine("Bar chart")
+        If mxdProps.bStackedChart Then sw.WriteLine("Stacked chart")
+        If mxdProps.bPieChart Then sw.WriteLine("Pie chart")
+        If mxdProps.b3DChart Then sw.WriteLine("3D chart")
+        If mxdProps.bChartOverlap Then sw.WriteLine("Chart overlap")
+        If mxdProps.bFixedSize Then sw.WriteLine("Fixed size")
+        If mxdProps.bChartLeaders Then sw.WriteLine("Leaders")
+        If mxdProps.bSimpleFill Then sw.WriteLine("Simple fill")
+        If mxdProps.bLineFill Then sw.WriteLine("Line fill")
+        If mxdProps.bMarkerFill Then sw.WriteLine("Marker fill")
+        If mxdProps.bGradientFill Then sw.WriteLine("Gradient fill")
+        If mxdProps.bPictureFill Then sw.WriteLine("Picture fill")
+        If mxdProps.bBarOrient Then sw.WriteLine("Bar orientation")
+        If mxdProps.bColumnOrient Then sw.WriteLine("Column orientation")
+        If mxdProps.bArithOrient Then sw.WriteLine("Arithmetic orientation")
+        If mxdProps.bGeogOrient Then sw.WriteLine("Geographic orientation")
+
+	End Sub
 
     '***************** add summary to spreadsheet *****************
     Private Sub WriteXLS(ByVal sMxdName As String)
