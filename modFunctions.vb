@@ -1,3 +1,19 @@
+'ReadMxd - export map document properties to a text file
+'Copyright (C) 2015 Jon Morris
+
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
+
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
+
+'You should have received a copy of the GNU General Public License
+'along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict Off
 Option Explicit On
 
@@ -424,7 +440,7 @@ Module ModFunctions
 
     Sub GetRasterRendererProps(ByRef pRR As IRasterRenderer, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
         sw.Flush()
-        Dim sTmp As String
+        'Dim sTmp As String
         Dim i As Integer
         Dim pClassCRRend As IRasterClassifyColorRampRenderer
         '? Dim pColormapRend As IRasterColormapRenderer
@@ -471,7 +487,7 @@ Module ModFunctions
             If pStretchCRRend.LabelHigh <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelHigh)
             If pStretchCRRend.LabelMedium <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelMedium)
             If pStretchCRRend.LabelLow <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & pStretchCRRend.LabelLow)
-            GetColorRamp(pStretchCRRend.ColorRamp, lTabLevel, bSymbolLevels)
+            GetColorRampProps(pStretchCRRend.ColorRamp, lTabLevel, bSymbolLevels)
             pRasterStretch2 = pStretchCRRend
             pRasterStretch3 = pStretchCRRend
             If pRasterStretch2.Background Then
@@ -711,7 +727,7 @@ Module ModFunctions
 
     End Sub
 
-    Sub GetColorRamp(ByRef pRamp As IColorRamp, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
+    Sub GetColorRampProps(ByRef pRamp As IColorRamp, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
         Dim i As Integer
         Dim pAlgCR As IAlgorithmicColorRamp
         Dim pMultipartCR As IMultiPartColorRamp
@@ -742,7 +758,7 @@ Module ModFunctions
                 For i = 0 To pMultipartCR.NumberOfRamps - 1
                     Dim tempRamp As IColorRamp
                     tempRamp = pMultipartCR.Ramp(i)  ' get ramp before passing it in or it starts adding new ramps
-                    GetColorRamp(tempRamp, lTabLevel + 1, bSymbolLevels)
+                    GetColorRampProps(tempRamp, lTabLevel + 1, bSymbolLevels)
                 Next
             ElseIf TypeOf pRamp Is IPresetColorRamp Then
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Preset Color Ramp")
@@ -797,7 +813,6 @@ Module ModFunctions
         Dim pSimpFillSym As ESRI.ArcGIS.Display.ISimpleFillSymbol
         Dim pMLyrFillSym As ESRI.ArcGIS.Display.IMultiLayerFillSymbol
         Dim pGradFillSym As ESRI.ArcGIS.Display.IGradientFillSymbol
-        Dim pColorRamp As ESRI.ArcGIS.Display.IColorRamp
         Dim pLineFillSym As ESRI.ArcGIS.Display.ILineFillSymbol
         Dim pMarkFillSym As ESRI.ArcGIS.Display.IMarkerFillSymbol
         Dim pPicFillSym As ESRI.ArcGIS.Display.IPictureFillSymbol
@@ -1015,7 +1030,7 @@ Module ModFunctions
                 mxdProps.bGradientFill = True
                 GetFillSymbolProps(pFillSym, lTabLevel, bSymbolLevels)
                 If pGradFillSym.IntervalCount <> 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Interval Count: " & pGradFillSym.IntervalCount)
-                GetColorRamp(pGradFillSym.ColorRamp, lTabLevel, bSymbolLevels)
+                GetColorRampProps(pGradFillSym.ColorRamp, lTabLevel, bSymbolLevels)
                 If Math.Abs(pGradFillSym.GradientAngle) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Gradient Angle: " & pGradFillSym.GradientAngle)
                 If Math.Abs(pGradFillSym.GradientPercentage) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Gradient Percentage: " & pGradFillSym.GradientPercentage)
                 Select Case pGradFillSym.Style
