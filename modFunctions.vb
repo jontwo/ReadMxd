@@ -73,6 +73,7 @@ Module ModFunctions
                 pDataLayer = pLayer
                 If Not (TypeOf pLayer Is IBasemapLayer Or _
                         TypeOf pLayer Is IMapServerLayer Or _
+                        TypeOf pLayer Is IMapServerRESTLayer Or _
                         TypeOf pLayer Is IImageServerLayer) Then
                     pDatasetName = pDataLayer.DataSourceName
                     pWSName = pDatasetName.WorkspaceName
@@ -318,6 +319,10 @@ Module ModFunctions
             End If 'read labels
 
             '********************
+        ElseIf TypeOf pLayer Is IMapServerRESTLayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Map server REST layer")
+            'TODO
+
         ElseIf TypeOf pLayer Is IMapServerLayer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Map server layer")
             pLayerFX = pLayer
@@ -431,6 +436,8 @@ Module ModFunctions
                 Next lGLayer
             End If
 
+        Else
+            sw.WriteLine(InsertTabs(lTabLevel) & "*** Unknown layer type ***")
         End If 'layer type
     End Sub
 

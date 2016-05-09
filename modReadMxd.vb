@@ -43,6 +43,7 @@ Module modReadMxd
     Public bLyrFile As Boolean
     Public bReadSymbols As Boolean
     Public bReadLabels As Boolean
+    Public bReadLayout As Boolean
     Private pMapDocument As IMapDocument = Nothing
     Private pActiveView As IActiveView = Nothing
     Public mxdProps As clsMxdProps = Nothing
@@ -64,6 +65,7 @@ Module modReadMxd
         bShowFullExp = False
         bReadSymbols = False
         bReadLabels = False
+        bReadLayout = False
         For i = 1 To UBound(sArgs)
             Select Case LCase(sArgs(i))
                 Case "-a"
@@ -78,6 +80,8 @@ Module modReadMxd
                     bReadSymbols = True
                 Case "-b"  'sorry, l is already taken!
                     bReadLabels = True
+                Case "-y"
+                    bReadLayout = True
                 Case Else
                     'reconstruct if spaces in file name
                     sMxdName = sMxdName & sArgs(i) & " "
@@ -272,12 +276,35 @@ Module modReadMxd
 
         'layout
         Dim pPageLayout As IPageLayout
+        Dim pElement As IElement
+        Dim pGraphContainer As IGraphicsContainer
         If TypeOf pActiveView Is IPageLayout _
             Or TypeOf pActiveView Is IPageLayout2 _
             Or TypeOf pActiveView Is IPageLayout3 Then
             pPageLayout = pActiveView
             mxdProps.bLayoutView = True
             sw.WriteLine("Layout view")
+            ' get frame elements - title, etc.
+            If bReadLayout Then
+                Dim strLayout As String = "Frame Elements:"
+                pGraphContainer = pMapDocument.PageLayout
+                pGraphContainer.Reset()
+                Dim pFrameElement As IFrameElement
+                pElement = pGraphContainer.Next()
+                While Not pElement Is Nothing
+                    If TypeOf pElement Is IFrameElement And Not TypeOf pElement Is IMapSurroundFrame Then
+                        If strLayout <> vbNullString Then
+                            sw.WriteLine(InsertTabs(1) & strLayout)
+                            strLayout = vbNullString
+                        End If
+                        pFrameElement = TryCast(pElement, IFrameElement)
+                        If Not pFrameElement.Object Is Nothing Then sw.WriteLine(InsertTabs(2) & "Frame Element: " & pFrameElement.Object.GetType().ToString())
+                        'TODO
+
+                    End If
+                    pElement = pGraphContainer.Next()
+                End While
+            End If
         Else
             pPageLayout = pMapDocument.PageLayout
             mxdProps.bLayoutView = False
@@ -294,8 +321,6 @@ Module modReadMxd
         Dim eWeight As esriBasicOverposterWeight
         Dim pMapFrame As IMapFrame
         Dim pSymBkg As ISymbolBackground
-        Dim pGraphContainer As IGraphicsContainer
-        Dim pElement As IElement
         Dim pMapAutoExtOpts As IMapAutoExtentOptions
         Dim dW, dH As Double
         Dim pMapOverposter As IMapOverposter
@@ -491,6 +516,87 @@ Module modReadMxd
                         End If
                     End If
                 End If 'read symbols
+                'get layout info
+                If bReadLayout Then
+                    Dim strLayout As String = "Layout Elements:"
+                    pGraphContainer.Reset()
+                    Dim pSurroundFrame As IMapSurroundFrame
+                    Dim pMapSurround As IMapSurround
+                    pElement = pGraphContainer.Next()
+                    While Not pElement Is Nothing
+                        If TypeOf pElement Is IMapSurroundFrame Then
+                            pSurroundFrame = TryCast(pElement, IMapSurroundFrame)
+                            If Not pSurroundFrame Is Nothing Then
+                                pMapSurround = pSurroundFrame.MapSurround
+                                If pMapSurround.Map Is pMap Then
+                                    If strLayout <> vbNullString Then
+                                        sw.WriteLine(InsertTabs(1) & strLayout)
+                                        strLayout = vbNullString
+                                    End If
+                                    sw.WriteLine(InsertTabs(2) & pMapSurround.Name)
+                                    If TypeOf pMapSurround Is ILegend Then
+                                        Dim pLegend As ILegend3
+                                        pLegend = TryCast(pMapSurround, ILegend3)
+                                        If Not pLegend Is Nothing Then
+                                            sw.WriteLine(InsertTabs(3) & "Name: " & pLegend.Name)
+                                            sw.WriteLine(InsertTabs(3) & "Title: " & pLegend.Title)
+                                            If pLegend.AutoAdd Then sw.WriteLine(InsertTabs(3) & "Auto Add")
+                                            If pLegend.AutoReorder Then sw.WriteLine(InsertTabs(3) & "Auto Reorder")
+                                            If pLegend.AutoVisibility Then sw.WriteLine(InsertTabs(3) & "Auto Visibility")
+                                            If pLegend.ScaleSymbols Then sw.WriteLine(InsertTabs(3) & "Scale Symbols")
+                                            If pLegend.FixedFrame Then
+                                                sw.WriteLine(InsertTabs(3) & "Fixed Frame")
+                                                If pLegend.AutoColumns Then sw.WriteLine(InsertTabs(4) & "Auto Columns")
+                                                If pLegend.AutoFit Then
+                                                    sw.WriteLine(InsertTabs(4) & "Auto Fit")
+                                                    sw.WriteLine(InsertTabs(4) & "Min font size: " & pLegend.MinFontSize)
+                                                End If
+                                            End If
+                                            Dim pLegendFormat As ILegendFormat2
+                                            pLegendFormat = pLegend.Format
+                                            If Not pLegendFormat Is Nothing Then
+                                                sw.WriteLine(InsertTabs(3) & "Legend Format:")
+                                                If pLegendFormat.ShowTitle Then sw.WriteLine(InsertTabs(4) & "Show Title")
+                                                sw.WriteLine(InsertTabs(4) & "Default Patch Width: " & pLegendFormat.DefaultPatchWidth)
+                                                sw.WriteLine(InsertTabs(4) & "Default Patch Height: " & pLegendFormat.DefaultPatchHeight)
+                                                sw.WriteLine(InsertTabs(4) & "Label Width: " & pLegendFormat.LabelWidth)
+                                                sw.WriteLine(InsertTabs(4) & "Description Width: " & pLegendFormat.DescriptionWidth)
+                                                'TODO gap sizes
+                                            End If
+                                            For i = 0 To pLegend.ItemCount - 1
+                                                Dim pLegendItem As ILegendItem
+                                                pLegendItem = pLegend.Item(i)
+                                                sw.WriteLine(InsertTabs(3) & "Item " & i + 1 & ": " & pLegendItem.Layer.Name)
+                                                sw.WriteLine(InsertTabs(4) & "Style Name: " & pLegendItem.Name)
+                                                If pLegendItem.NewColumn Then sw.WriteLine(InsertTabs(4) & "Starts New Column")
+                                                If pLegendItem.KeepTogether Then sw.WriteLine(InsertTabs(4) & "Keep Together")
+                                                If pLegendItem.ShowDescriptions Then sw.WriteLine(InsertTabs(4) & "Show Descriptions")
+                                                If pLegendItem.ShowLabels Then sw.WriteLine(InsertTabs(4) & "Show Labels")
+                                                If pLegendItem.ShowHeading Then
+                                                    sw.WriteLine(InsertTabs(4) & "Show Heading")
+                                                    GetTextSymbolProps(pLegendItem.HeadingSymbol, 5)
+                                                End If
+                                                If pLegendItem.ShowLayerName Then
+                                                    sw.WriteLine(InsertTabs(4) & "Show Layer Name")
+                                                    GetTextSymbolProps(pLegendItem.LayerNameSymbol, 5)
+                                                End If
+                                            Next
+                                        End If
+                                    ElseIf TypeOf pMapSurround Is IMarkerNorthArrow Then
+                                        'TODO other map surround types
+                                    ElseIf TypeOf pMapSurround Is IScaleBar Then
+                                    ElseIf TypeOf pMapSurround Is IScaleLine Then
+                                    ElseIf TypeOf pMapSurround Is IScaleText Then
+                                    ElseIf TypeOf pMapSurround Is IMapInset Then
+                                    ElseIf TypeOf pMapSurround Is IOverview Then
+
+                                    End If
+                                End If
+                            End If
+                        End If
+                        pElement = pGraphContainer.Next()
+                    End While
+                End If
             End If
             sw.WriteLine(InsertTabs(1) & "Map Bounds: " & pEnv.XMin & ", " & pEnv.YMin & ", " & pEnv.XMax & ", " & pEnv.YMax)
             pEnv = pDisplayTrans.VisibleBounds
