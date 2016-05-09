@@ -23,7 +23,7 @@ Imports System.Reflection
 
 <Assembly: AssemblyTitle("Read MXD VB.NET")> 
 <Assembly: AssemblyDescription("")> 
-<Assembly: AssemblyCompany("ESRI")>
+<Assembly: AssemblyCompany("")> 
 <Assembly: AssemblyProduct("")>
 <Assembly: AssemblyCopyright("")>
 <Assembly: AssemblyTrademark("")>
