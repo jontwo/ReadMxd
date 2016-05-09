@@ -73,7 +73,6 @@ Module ModFunctions
                 pDataLayer = pLayer
                 If Not (TypeOf pLayer Is IBasemapLayer Or _
                         TypeOf pLayer Is IMapServerLayer Or _
-                        TypeOf pLayer Is IMapServerRESTLayer Or _
                         TypeOf pLayer Is IImageServerLayer) Then
                     pDatasetName = pDataLayer.DataSourceName
                     pWSName = pDatasetName.WorkspaceName
@@ -317,11 +316,6 @@ Module ModFunctions
                 pLayerFX = pLayer
                 If pLayerFX.Transparency > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Transparency: " & pLayerFX.Transparency & "%")
             End If 'read labels
-
-            '********************
-        ElseIf TypeOf pLayer Is IMapServerRESTLayer Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Map server REST layer")
-            'TODO
 
         ElseIf TypeOf pLayer Is IMapServerLayer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Map server layer")

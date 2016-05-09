@@ -535,8 +535,8 @@ Module modReadMxd
                                     End If
                                     sw.WriteLine(InsertTabs(2) & pMapSurround.Name)
                                     If TypeOf pMapSurround Is ILegend Then
-                                        Dim pLegend As ILegend3
-                                        pLegend = TryCast(pMapSurround, ILegend3)
+                                        Dim pLegend As ILegend2
+                                        pLegend = TryCast(pMapSurround, ILegend2)
                                         If Not pLegend Is Nothing Then
                                             sw.WriteLine(InsertTabs(3) & "Name: " & pLegend.Name)
                                             sw.WriteLine(InsertTabs(3) & "Title: " & pLegend.Title)
@@ -552,7 +552,7 @@ Module modReadMxd
                                                     sw.WriteLine(InsertTabs(4) & "Min font size: " & pLegend.MinFontSize)
                                                 End If
                                             End If
-                                            Dim pLegendFormat As ILegendFormat2
+                                            Dim pLegendFormat As ILegendFormat
                                             pLegendFormat = pLegend.Format
                                             If Not pLegendFormat Is Nothing Then
                                                 sw.WriteLine(InsertTabs(3) & "Legend Format:")
