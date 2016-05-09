@@ -372,7 +372,11 @@ Module ModFunctions
 
             sw.WriteLine(InsertTabs(lTabLevel) & "Columns and Rows: " & pRasterLayer.ColumnCount & ", " & pRasterLayer.RowCount)
             sw.WriteLine(InsertTabs(lTabLevel) & "Band count: " & pRasterLayer.BandCount)
-            sw.WriteLine(InsertTabs(lTabLevel) & "Pyramids: " & pRasterLayer.PyramidPresent)
+            Try
+                sw.WriteLine(InsertTabs(lTabLevel) & "Pyramids: " & pRasterLayer.PyramidPresent)
+            Catch ex As Exception
+                sw.WriteLine(InsertTabs(lTabLevel) & "Error: could not get pyramid info. " & ex.Message)
+            End Try
 
             If Not pRasterLayer.Raster Is Nothing Then
                 Dim pRas As IRaster
