@@ -1235,19 +1235,20 @@ Module ModFunctions
     Sub GetMarkerSymbolProps(ByRef pMarkSym As ESRI.ArcGIS.Display.IMarkerSymbol, ByRef lTabLevel As Integer, _
                              Optional ByVal bColor As Boolean = True, Optional ByVal bAngle As Boolean = True)
         sw.Flush()
-        sw.WriteLine(InsertTabs(lTabLevel) & "Size: " & pMarkSym.Size)
+        sw.WriteLine(InsertTabs(lTabLevel) & "Marker symbol properties:")
+        sw.WriteLine(InsertTabs(lTabLevel + 1) & "Size: " & pMarkSym.Size)
         If bColor Then
             If pMarkSym.Color Is Nothing Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "No Color")
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "No Color")
             Else
-                sw.WriteLine(InsertTabs(lTabLevel) & "Color (RGB): " & GetRGB(pMarkSym.Color))
-                sw.WriteLine(InsertTabs(lTabLevel) & "Color (CMYK): " & GetCMYK(pMarkSym.Color))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Color (RGB): " & GetRGB(pMarkSym.Color))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Color (CMYK): " & GetCMYK(pMarkSym.Color))
             End If
         End If
         If bAngle Then
-            If Math.Abs(pMarkSym.Angle) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Angle: " & pMarkSym.Angle)
+            If Math.Abs(pMarkSym.Angle) > 0 Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Angle: " & pMarkSym.Angle)
         End If
-        If Math.Abs(pMarkSym.XOffset) > 0 Or Math.Abs(pMarkSym.YOffset) > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Offset: " & pMarkSym.XOffset & ", " & pMarkSym.YOffset)
+        If Math.Abs(pMarkSym.XOffset) > 0 Or Math.Abs(pMarkSym.YOffset) > 0 Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Offset: " & pMarkSym.XOffset & ", " & pMarkSym.YOffset)
     End Sub
 
     'inherited properties on all types of fill symbol
