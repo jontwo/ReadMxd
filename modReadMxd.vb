@@ -223,6 +223,7 @@ Module modReadMxd
         If bAllLayers Then sw.WriteLine("Showing all layers")
         If bReadSymbols Then sw.WriteLine("Reading symbols")
         If bReadLabels Then sw.WriteLine("Reading labels")
+        If bReadLayout Then sw.WriteLine("Reading layout")
         'open mxd
         Try
             pMapDocument = New MapDocument

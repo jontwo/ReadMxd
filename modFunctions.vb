@@ -626,7 +626,7 @@ Module ModFunctions
             End If
             Dim pDataExclusion As IDataExclusion = pChartRend
             If Not pDataExclusion Is Nothing Then
-                sw.WriteLine(InsertTabs(lTabLevel) & "Exclusion query: " & pDataExclusion.ExclusionClause)
+                If pDataExclusion.ExclusionClause <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Exclusion query: " & pDataExclusion.ExclusionClause)
                 If pDataExclusion.ShowExclusionClass Then
                     If pDataExclusion.ExclusionLabel <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Label: " & pDataExclusion.ExclusionLabel)
                     If pDataExclusion.ExclusionDescription <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Description: " & pDataExclusion.ExclusionDescription)
@@ -866,7 +866,6 @@ Module ModFunctions
         Dim pStackedChartSym As IStackedChartSymbol
         If TypeOf pSym Is ESRI.ArcGIS.Display.IMarkerSymbol Then
             pMarkSym = pSym
-            'Print #InsertTabs(lTabLevel) & "Marker Symbol"
             If TypeOf pMarkSym Is ESRI.ArcGIS.Display.ISimpleMarkerSymbol Then
                 pSimpMarkSym = pMarkSym
                 sw.WriteLine(InsertTabs(lTabLevel) & "Simple Marker Symbol")
@@ -959,8 +958,6 @@ Module ModFunctions
                     mxdProps.b3DChart = True
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Thickness: " & p3DChartSym.Thickness)
                 End If
-                'Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pBarChartSym
-                'GetSymbolProps(pMarkerBkgSupport.Background.MarkerSymbol, lTabLevel, bSymbolLevels)
             ElseIf TypeOf pMarkSym Is ESRI.ArcGIS.Display.IStackedChartSymbol Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Stacked Chart Symbol")
                 mxdProps.bStackedChart = True
@@ -988,8 +985,6 @@ Module ModFunctions
                     mxdProps.b3DChart = True
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Thickness: " & p3DChartSym.Thickness)
                 End If
-                'Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pStackedChartSym
-                'GetSymbolProps(pMarkerBkgSupport.Background.MarkerSymbol, lTabLevel, bSymbolLevels)
             ElseIf TypeOf pMarkSym Is ESRI.ArcGIS.Display.IPieChartSymbol Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Pie Chart Symbol")
                 mxdProps.bPieChart = True
@@ -1012,9 +1007,6 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Thickness: " & p3DChartSym.Thickness)
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Tilt: " & p3DChartSym.Tilt)
                 End If
-                'Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pPieChartSym
-                'If Not pMarkerBkgSupport.Background Is Nothing Then _
-                '    GetSymbolProps(pMarkerBkgSupport.Background.MarkerSymbol, lTabLevel, bSymbolLevels)
             ElseIf TypeOf pMarkSym Is ESRI.ArcGIS.Analyst3D.ISimpleMarker3DSymbol Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "3D Simple Marker Symbol")
                 GetMarkerSymbolProps(pMarkSym, lTabLevel)
@@ -1027,7 +1019,6 @@ Module ModFunctions
             'Fill Symbol
         ElseIf TypeOf pSym Is ESRI.ArcGIS.Display.IFillSymbol Then
             pFillSym = pSym
-            'Print #InsertTabs(lTabLevel) & "Fill Symbol"
             If TypeOf pFillSym Is ESRI.ArcGIS.Display.ISimpleFillSymbol Then
                 pSimpFillSym = pFillSym
                 sw.WriteLine(InsertTabs(lTabLevel) & "Simple Fill Symbol")
