@@ -558,6 +558,8 @@ Module ModFunctions
         Dim pRepsRend As IRepresentationRenderer
         Dim pUVR As IUniqueValueRenderer
         Dim pPieChartRend As IPieChartRenderer
+        Dim pRendFields As IRendererFields
+        Dim pSymArray As ISymbolArray
         If TypeOf pFR Is ISimpleRenderer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Simple Renderer")
             pSimpRend = pFR
@@ -598,16 +600,29 @@ Module ModFunctions
                 End If
                 If pPieChartRend.FlanneryCompensation Then sw.WriteLine(InsertTabs(lTabLevel) & "Flannery compensation")
             End If
-            Dim pRendFields As IRendererFields = pChartRend
-            sw.WriteLine(InsertTabs(lTabLevel) & "Fields:")
-            For i = 0 To pRendFields.FieldCount - 1
-                If pRendFields.FieldAlias(i) <> "" Then
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & pRendFields.Field(i))
-                Else
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & pRendFields.Field(i) & " Alias: " & pRendFields.FieldAlias(i))
-                End If
-                'TODO get field symbols
-            Next
+            'put all the field names in an array...
+            Dim pFieldNames(ARRAY_SIZE) As String
+            pRendFields = pChartRend
+            If Not pRendFields Is Nothing Then
+                For i = 0 To pRendFields.FieldCount - 1
+                    If i < ARRAY_SIZE Then
+                        If pRendFields.FieldAlias(i) <> "" Then
+                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i)
+                        Else
+                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i) & " Alias: " & pRendFields.FieldAlias(i)
+                        End If
+                    End If
+                Next
+            End If
+            '... then write the names as we get the symbols
+            pSymArray = pChartRend.ChartSymbol
+            If Not pSymArray Is Nothing Then
+                sw.WriteLine(InsertTabs(lTabLevel) & "Field symbols:")
+                For i = 0 To pSymArray.SymbolCount - 1
+                    If i < ARRAY_SIZE Then sw.WriteLine(pFieldNames(i))
+                    GetSymbolProps(pSymArray.Symbol(i), lTabLevel + 1, bSymbolLevels)
+                Next
+            End If
             Dim pDataExclusion As IDataExclusion = pChartRend
             If Not pDataExclusion Is Nothing Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Exclusion query: " & pDataExclusion.ExclusionClause)
@@ -624,10 +639,10 @@ Module ModFunctions
             'TODO where does leader hook in? here or bar/stacked/piechartsymbol?
             'Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pChartRend.ChartSymbol
             'If Not pMarkerBkgSupport.Background Is Nothing Then
-            '  Dim pMarkBkg As IMarkerBackground = pMarkerBkgSupport.Background
-            '  If Not pMarkBkg Is Nothing Then
-            '    GetSymbolProps(pMarkBkg.MarkerSymbol, lTabLevel, bSymbolLevels)
-            '  End If
+            '    Dim pMarkBkg As IMarkerBackground = pMarkerBkgSupport.Background
+            '    If Not pMarkBkg Is Nothing Then
+            '        GetSymbolProps(pMarkBkg.MarkerSymbol, lTabLevel, bSymbolLevels)
+            '    End If
             'End If
             sw.WriteLine(InsertTabs(lTabLevel) & "Chart Symbol:")
             GetSymbolProps(pChartRend.ChartSymbol, lTabLevel + 1, bSymbolLevels)
