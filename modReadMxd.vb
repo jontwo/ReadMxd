@@ -290,17 +290,36 @@ Module modReadMxd
                 pGraphContainer = pMapDocument.PageLayout
                 pGraphContainer.Reset()
                 Dim pFrameElement As IFrameElement
+                Dim elementCount As Integer = 0
                 pElement = pGraphContainer.Next()
                 While Not pElement Is Nothing
-                    If TypeOf pElement Is IFrameElement And Not TypeOf pElement Is IMapSurroundFrame Then
+                    elementCount += 1
+                    If TypeOf pElement Is IFrameElement Then
                         If strLayout <> vbNullString Then
                             sw.WriteLine(InsertTabs(1) & strLayout)
                             strLayout = vbNullString
                         End If
                         pFrameElement = TryCast(pElement, IFrameElement)
-                        If Not pFrameElement.Object Is Nothing Then sw.WriteLine(InsertTabs(2) & "Frame Element: " & pFrameElement.Object.GetType().ToString())
-                        'TODO
-
+                        If Not pFrameElement.Object Is Nothing Then
+                            sw.WriteLine(InsertTabs(2) & "Frame Element (" & elementCount & "):")
+                            ' TODO try and cast pFrameElement.Object to figure out what it is
+                            If pFrameElement.DraftMode Then sw.WriteLine(InsertTabs(3) & "Draft mode")
+                            Dim pBackground As IBackground
+                            pBackground = pFrameElement.Background
+                            If Not pBackground Is Nothing Then
+                                If pBackground.Name <> "" Then sw.WriteLine(InsertTabs(3) & "Background name: " & pBackground.Name)
+                                sw.WriteLine(InsertTabs(3) & "Gap: " & CDbl(pBackground.Gap))
+                                ' TODO cast as ISymbolBackground and get LineSymbol and CornerRounding
+                            End If
+                            Dim pBorder As IBorder
+                            pBorder = pFrameElement.Border
+                            If Not pBorder Is Nothing Then
+                                If pBorder.Name <> "" Then sw.WriteLine(InsertTabs(3) & "Border name: " & pBorder.Name)
+                                sw.WriteLine(InsertTabs(3) & "Gap: " & CDbl(pBorder.Gap))
+                                ' TODO cast as ISymbolBorder and get LineSymbol and CornerRounding
+                            End If
+                        End If
+                        ' TODO If TypeOf pElement Is IMapSurroundFrame get MapFrame and MapSurround
                     End If
                     pElement = pGraphContainer.Next()
                 End While
