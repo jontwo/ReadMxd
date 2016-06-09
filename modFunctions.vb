@@ -647,14 +647,14 @@ Module ModFunctions
                 sw.WriteLine(InsertTabs(lTabLevel) & "Base Symbol:")
                 GetSymbolProps(pChartRend.BaseSymbol, lTabLevel + 1, bSymbolLevels)
             End If
-            'TODO where does leader hook in? here or bar/stacked/piechartsymbol?
-            'Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pChartRend.ChartSymbol
-            'If Not pMarkerBkgSupport.Background Is Nothing Then
-            '    Dim pMarkBkg As IMarkerBackground = pMarkerBkgSupport.Background
-            '    If Not pMarkBkg Is Nothing Then
-            '        GetSymbolProps(pMarkBkg.MarkerSymbol, lTabLevel, bSymbolLevels)
-            '    End If
-            'End If
+            Dim pMarkerBkgSupport As IMarkerBackgroundSupport = pChartRend.ChartSymbol
+            If Not pMarkerBkgSupport Is Nothing Then
+                Dim pMarkBkg As IMarkerBackground = pMarkerBkgSupport.Background
+                If Not pMarkBkg Is Nothing Then
+                    sw.WriteLine(InsertTabs(lTabLevel) & "Leader Line:")
+                    GetLineCalloutProps(pMarkBkg, lTabLevel + 1, bSymbolLevels)
+                End If
+            End If
             sw.WriteLine(InsertTabs(lTabLevel) & "Chart Symbol:")
             GetSymbolProps(pChartRend.ChartSymbol, lTabLevel + 1, bSymbolLevels)
         ElseIf TypeOf pFR Is IClassBreaksRenderer Then
@@ -1455,7 +1455,6 @@ Module ModFunctions
         Dim pFormTextSym As IFormattedTextSymbol
         Dim pTextBackground As ITextBackground
         Dim pBalloonCallout As IBalloonCallout
-        Dim pLineCallout As ILineCallout
         Dim pSimpleLineCallout As ISimpleLineCallout
         Dim pMarkerTextBkg As IMarkerTextBackground
         Dim pMarkerSymbol As IMarkerSymbol
@@ -1553,18 +1552,15 @@ Module ModFunctions
             If TypeOf pTextBackground Is IBalloonCallout Then
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Balloon callout")
                 pBalloonCallout = pTextBackground
+                If bReadSymbols Then
+                    GetSymbolProps(pBalloonCallout.Symbol, lTabLevel + 2, False)
+                End If
                 sw.WriteLine(InsertTabs(lTabLevel + 2) & "Tolerance: " & pBalloonCallout.LeaderTolerance())
+                sw.WriteLine(InsertTabs(lTabLevel + 2) & "Callout style: " & GetBalloonCalloutStyle(pBalloonCallout.Style))
+                GetTextMargins(pBalloonCallout, lTabLevel + 2)
                 mxdProps.bBalloonCallout = True
             ElseIf TypeOf pTextBackground Is ILineCallout Then
-                sw.WriteLine(InsertTabs(lTabLevel + 1) & "Line callout")
-                pLineCallout = pTextBackground
-                sw.WriteLine(InsertTabs(lTabLevel + 2) & "Gap: " & pLineCallout.Gap)
-                sw.WriteLine(InsertTabs(lTabLevel + 2) & "Tolerance: " & pLineCallout.LeaderTolerance())
-                If Not pLineCallout.LeaderLine Is Nothing Then sw.WriteLine(InsertTabs(lTabLevel + 2) & "Leader line")
-                If Not pLineCallout.AccentBar Is Nothing Then sw.WriteLine(InsertTabs(lTabLevel + 2) & "Accent bar")
-                If Not pLineCallout.Border Is Nothing Then sw.WriteLine(InsertTabs(lTabLevel + 2) & "Border")
-                sw.WriteLine(InsertTabs(lTabLevel + 2) & "Callout style: " & GetLineCalloutStyle(pLineCallout.Style))
-                mxdProps.bLineCallout = True
+                GetLineCalloutProps(pTextBackground, lTabLevel + 1, False)
             ElseIf TypeOf pTextBackground Is ISimpleLineCallout Then
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Simple line callout")
                 pSimpleLineCallout = pTextBackground
@@ -1640,6 +1636,38 @@ Module ModFunctions
         If pSimpleTextSymbol.BreakCharacter > 0 Then sw.WriteLine(InsertTabs(lTabLevel) & "Break character: " & Chr(pSimpleTextSymbol.BreakCharacter))
         If pSimpleTextSymbol.Clip Then sw.WriteLine(InsertTabs(lTabLevel) & "Clipped per geometry")
 
+    End Sub
+
+    ' pulling out this section so it can be reused for charts
+    Sub GetLineCalloutProps(ByRef pLineCallout As ILineCallout, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
+        sw.WriteLine(InsertTabs(lTabLevel) & "Line callout")
+        sw.WriteLine(InsertTabs(lTabLevel + 1) & "Gap: " & pLineCallout.Gap)
+        sw.WriteLine(InsertTabs(lTabLevel + 1) & "Tolerance: " & pLineCallout.LeaderTolerance())
+        If Not pLineCallout.LeaderLine Is Nothing Then
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Leader line")
+            If bReadSymbols Then
+                GetSymbolProps(pLineCallout.LeaderLine, lTabLevel + 2, bSymbolLevels)
+            End If
+        End If
+        If Not pLineCallout.AccentBar Is Nothing Then
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Accent bar")
+            If bReadSymbols Then
+                GetSymbolProps(pLineCallout.AccentBar, lTabLevel + 2, bSymbolLevels)
+            End If
+        End If
+        If Not pLineCallout.Border Is Nothing Then
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Border")
+            If bReadSymbols Then
+                GetSymbolProps(pLineCallout.Border, lTabLevel + 2, bSymbolLevels)
+            End If
+        End If
+        sw.WriteLine(InsertTabs(lTabLevel + 1) & "Callout style: " & GetLineCalloutStyle(pLineCallout.Style))
+        GetTextMargins(pLineCallout, lTabLevel + 1)
+        mxdProps.bLineCallout = True
+    End Sub
+
+    Sub GetTextMargins(ByRef pTextMargins As ITextMargins, ByRef lTabLevel As Integer)
+        sw.WriteLine(InsertTabs(lTabLevel) & "Margins (LRTB): " & pTextMargins.LeftMargin & ", " & pTextMargins.RightMargin & ", " & pTextMargins.TopMargin & ", " & pTextMargins.BottomMargin)
     End Sub
 
     Sub GetMLEProps(ByRef pLabelEngineLayerProperties As ILabelEngineLayerProperties2, _
@@ -2951,6 +2979,19 @@ Module ModFunctions
                 GetPicType = "Enhanced Metafile"
             Case Else
                 GetPicType = "Unknown Type"
+        End Select
+    End Function
+
+    Function GetBalloonCalloutStyle(ByVal style As esriBalloonCalloutStyle) As String
+        Select Case (style)
+            Case esriBalloonCalloutStyle.esriBCSOval
+                GetBalloonCalloutStyle = "Oval"
+            Case esriBalloonCalloutStyle.esriBCSRectangle
+                GetBalloonCalloutStyle = "Rectangle"
+            Case esriBalloonCalloutStyle.esriBCSRoundedRectangle
+                GetBalloonCalloutStyle = "Rounded Rectangle"
+            Case Else
+                GetBalloonCalloutStyle = "Unknown style"
         End Select
     End Function
 
