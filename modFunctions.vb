@@ -602,6 +602,7 @@ Module ModFunctions
                     If pPieChartRend.ProportionalFieldAlias <> "" Then _
                         If Not pPieChartRend.ProportionalFieldAlias.Equals(pPieChartRend.ProportionalField, StringComparison.CurrentCulture) Then _
                             sw.WriteLine(InsertTabs(lTabLevel) & "Proportional field alias: " & pPieChartRend.ProportionalFieldAlias)
+                    GetNormalization(pChartRend, lTabLevel)
                     sw.WriteLine(InsertTabs(lTabLevel) & "Min Size: " & pPieChartRend.MinSize)
                     sw.WriteLine(InsertTabs(lTabLevel) & "Min Value: " & pPieChartRend.MinValue)
                 Else
@@ -665,7 +666,8 @@ Module ModFunctions
             End If
             If pClassBreaksRend.SortClassesAscending Then sw.WriteLine(InsertTabs(lTabLevel) & "Sort classes ascending")
             If pClassBreaksRend.Field <> vbNullString Then sw.WriteLine(InsertTabs(lTabLevel) & "Field: " & pClassBreaksRend.Field)
-            If pClassBreaksRend.NormField <> vbNullString Then sw.WriteLine(InsertTabs(lTabLevel) & "Norm field: " & pClassBreaksRend.NormField)
+            'If pClassBreaksRend.NormField <> vbNullString Then sw.WriteLine(InsertTabs(lTabLevel) & "Norm field: " & pClassBreaksRend.NormField)
+            GetNormalization(pClassBreaksRend, lTabLevel)
             sw.WriteLine(InsertTabs(lTabLevel) & "Minimum break: " & pClassBreaksRend.MinimumBreak)
             For i = 0 To pClassBreaksRend.BreakCount - 1
                 sw.WriteLine(InsertTabs(lTabLevel) & "Break " & i & ": ")
@@ -751,6 +753,24 @@ Module ModFunctions
         '    If pTransRend.TransparencyField <> "" Then sw.writeline(InsertTabs(lTabLevel + 1) & "Transparency Field: " & pTransRend.TransparencyField)
         '  End If
 
+    End Sub
+
+    Sub GetNormalization(ByRef pDataNorm As IDataNormalization, ByRef lTabLevel As Integer)
+        Select Case pDataNorm.NormalizationType
+            Case esriDataNormalization.esriNormalizeByArea
+                sw.WriteLine(InsertTabs(lTabLevel) & "Normalize by area")
+            Case esriDataNormalization.esriNormalizeByField
+                If pDataNorm.NormalizationField <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Normalization field: " & pDataNorm.NormalizationField)
+                If pDataNorm.NormalizationFieldAlias <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Normalization field alias: " & pDataNorm.NormalizationFieldAlias)
+            Case esriDataNormalization.esriNormalizeByLog
+                sw.WriteLine(InsertTabs(lTabLevel) & "Normalize by log")
+            Case esriDataNormalization.esriNormalizeByNothing
+                'do nothing
+            Case esriDataNormalization.esriNormalizeByPercentOfTotal
+                sw.WriteLine(InsertTabs(lTabLevel) & "Normalization by percent of total: " & pDataNorm.NormalizationTotal)
+            Case Else
+                sw.WriteLine(InsertTabs(lTabLevel) & "Unknown normalization type")
+        End Select
     End Sub
 
     Sub GetColorRampProps(ByRef pRamp As IColorRamp, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
