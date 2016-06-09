@@ -967,8 +967,9 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel) & "Arithmetic orientation")
                     mxdProps.bArithOrient = True
                 End If
-                If pPieChartSym.UseOutline Then sw.WriteLine(InsertTabs(lTabLevel) & "Use outline")
-                GetLineSymbolProps(pPieChartSym.Outline, lTabLevel)
+                If pPieChartSym.UseOutline Then
+                    GetLineSymbolProps(pPieChartSym.Outline, lTabLevel)
+                End If
                 p3DChartSym = pMarkSym
                 If p3DChartSym.Display3D Then
                     sw.WriteLine(InsertTabs(lTabLevel) & "Display 3D")
