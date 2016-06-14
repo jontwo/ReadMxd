@@ -132,6 +132,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.GISClient.dll</HintPath>
     </Reference>
+    <Reference Include="ESRI.ArcGIS.NetworkAnalyst, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="ESRI.ArcGIS.System, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.System.dll</HintPath>
@@ -149,8 +153,6 @@
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>

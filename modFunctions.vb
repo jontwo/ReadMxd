@@ -25,6 +25,7 @@ Imports ESRI.ArcGIS.DataSourcesFile
 Imports ESRI.ArcGIS.DataSourcesGDB
 Imports ESRI.ArcGIS.Display
 Imports ESRI.ArcGIS.esriSystem
+Imports ESRI.ArcGIS.NetworkAnalyst
 Imports System.Text.RegularExpressions
 
 
@@ -444,6 +445,10 @@ Module ModFunctions
                 Next lGLayer
             End If
 
+        ElseIf TypeOf pLayer Is INetworkLayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Network layer")
+        ElseIf TypeOf pLayer Is INALayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Network Analysis layer")
         Else
             sw.WriteLine(InsertTabs(lTabLevel) & "*** Unknown layer type ***")
         End If 'layer type
