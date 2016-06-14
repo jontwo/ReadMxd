@@ -511,8 +511,18 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Minimum maximum")
                 Case esriRasterStretchTypesEnum.esriRasterStretch_DefaultFromSource
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Default")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_Count
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Count")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_Custom
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Custom")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_ESRI
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: ESRI")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_NONE
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: NONE")
+                Case esriRasterStretchTypesEnum.esriRasterStretch_PercentMinimumMaximum
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Percent minimum maximum")
                 Case Else
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Other ***** TODO *****")  ' TODO fill in others
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Unknown")
             End Select
             If pRasterStretch3.UseGamma Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Gamma: " & pRasterStretch3.GammaValue)
         ElseIf TypeOf pRR Is IRasterUniqueValueRenderer Then
@@ -849,6 +859,7 @@ Module ModFunctions
         Dim pMLyrMarkSym As ESRI.ArcGIS.Display.IMultiLayerMarkerSymbol
         Dim pArrowMarkSym As ESRI.ArcGIS.Display.IArrowMarkerSymbol
         Dim pCharMarkSym As ESRI.ArcGIS.Display.ICharacterMarkerSymbol
+        Dim p3DMarkSym As ESRI.ArcGIS.Analyst3D.IMarker3DSymbol
         Dim pPicMarkSym As ESRI.ArcGIS.Display.IPictureMarkerSymbol
         Dim pPicDisp As stdole.IPictureDisp = New stdole.StdPictureClass()
         Dim pFontDisp As stdole.IFontDisp = New stdole.StdFontClass()
@@ -924,9 +935,15 @@ Module ModFunctions
                 If pFontDisp.Strikethrough Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Strikethrough")
                 sw.WriteLine(InsertTabs(lTabLevel) & "Index: " & pCharMarkSym.CharacterIndex)
             ElseIf TypeOf pMarkSym Is ESRI.ArcGIS.Analyst3D.IMarker3DSymbol Then
+                p3DMarkSym = pSym
                 sw.WriteLine(InsertTabs(lTabLevel) & "3D Marker Symbol")
                 GetMarkerSymbolProps(pMarkSym, lTabLevel)
-                sw.WriteLine(InsertTabs(lTabLevel) & "************ TODO ************")
+                If p3DMarkSym.IsRestricted Then sw.WriteLine(InsertTabs(lTabLevel) & "Is restricted")
+                If p3DMarkSym.UseMaterialDraping Then sw.WriteLine(InsertTabs(lTabLevel) & "Use material draping")
+                sw.WriteLine(InsertTabs(lTabLevel) & "Material count: " & p3DMarkSym.MaterialCount)
+                Dim pGeometry As IGeometry
+                pGeometry = p3DMarkSym.Shape
+                If Not pGeometry Is Nothing Then GetGeometryProps(pGeometry, lTabLevel)
             ElseIf TypeOf pMarkSym Is ESRI.ArcGIS.Display.IPictureMarkerSymbol Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Picture Marker Symbol")
                 pPicMarkSym = pSym
@@ -1302,8 +1319,30 @@ Module ModFunctions
     End Sub
 
     Sub GetRepresentationClass(ByRef pRepClass As ESRI.ArcGIS.Geodatabase.IRepresentationClass, ByRef lTabLevel As Integer)
-        sw.WriteLine(InsertTabs(lTabLevel) & "Representation Class:")
-        sw.WriteLine(InsertTabs(lTabLevel) & "************ TODO ************")
+        If pRepClass Is Nothing Then Return
+
+        sw.WriteLine(InsertTabs(lTabLevel) & "Representation Class " & pRepClass.ID & ":")
+        Dim pFC As IFeatureClass
+        pFC = pRepClass.FeatureClass
+        If Not pFC Is Nothing Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Feature class name: " & pFC.AliasName)
+        GetGraphicAttributes(pRepClass.GraphicAttributes, lTabLevel + 1)
+        sw.WriteLine(InsertTabs(lTabLevel + 1) & "RuleID field index: " & pRepClass.RuleIDFieldIndex)
+        If pRepClass.RequireShapeOverride Then
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Require shape override")
+            sw.WriteLine(InsertTabs(lTabLevel + 1) & "Override field index: " & pRepClass.OverrideFieldIndex)
+        End If
+        ' TODO pRepClass.RepresentationRules
+    End Sub
+
+    Sub GetGraphicAttributes(ByVal pGraphicAttr As IGraphicAttributes, ByRef lTabLevel As Integer)
+        sw.WriteLine(InsertTabs(lTabLevel) & "Class name: " & pGraphicAttr.ClassName)
+        Dim i As Integer
+        For i = 0 To pGraphicAttr.GraphicAttributeCount - 1
+            sw.WriteLine(InsertTabs(lTabLevel) & i & ": ID: " & pGraphicAttr.ID(i) & " Name: " & pGraphicAttr.Name(i))
+            Dim pGraphAttrType As IGraphicAttributeType
+            pGraphAttrType = pGraphicAttr.Type(i)
+            If Not pGraphAttrType Is Nothing Then sw.WriteLine(InsertTabs(lTabLevel) & "   " & " Type: " & GetGraphicAttributeType(pGraphAttrType.Type))
+        Next
     End Sub
 
     Sub GetAnnoProps(ByRef pLayer As ILayer, ByRef pAnnotateLPColl As IAnnotateLayerPropertiesCollection, _
@@ -2534,6 +2573,64 @@ Module ModFunctions
         End If
 
     End Sub
+
+    Public Sub GetGeometryProps(ByRef pGeometry As IGeometry, ByRef lTabLevel As Integer)
+        sw.WriteLine(InsertTabs(lTabLevel) & "Geometry type: " & GetGeomType(pGeometry.GeometryType))
+        If pGeometry.IsEmpty Then sw.WriteLine("Is Empty")
+        Dim pSR As ISpatialReference
+        pSR = pGeometry.SpatialReference
+        If Not pSR Is Nothing Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Spatial reference: " & pSR.Name)
+        End If
+        sw.WriteLine(InsertTabs(lTabLevel) & "Dimension: " & GetDimension(pGeometry.Dimension))
+        ' TODO Envelope
+    End Sub
+
+    Function GetDimension(ByRef eDim As esriGeometryDimension) As String
+        Select Case eDim
+            Case esriGeometryDimension.esriGeometry0Dimension
+                GetDimension = "0 Dimension (Points And Multipoints)"
+            Case esriGeometryDimension.esriGeometry1Dimension
+                GetDimension = "1 Dimension (Segments, Paths, and Polylines)"
+            Case esriGeometryDimension.esriGeometry2Dimension
+                GetDimension = "2 Dimension (Envelopes, Rings, Polygons And Multipatches)"
+            Case esriGeometryDimension.esriGeometry25Dimension
+                GetDimension = "2.5 Dimension (ZAware esriGeometry2Dimension objects)"
+            Case esriGeometryDimension.esriGeometry3Dimension
+                GetDimension = "3 Dimension (New upcoming geometry type)"
+            Case esriGeometryDimension.esriGeometryNoDimension
+                GetDimension = "No Dimension (GeometryBags)"
+            Case Else
+                GetDimension = "Unknown Dimension"
+        End Select
+    End Function
+
+    Function GetGraphicAttributeType(ByRef eGraphType As esriGraphicAttributeType) As String
+        Select Case eGraphType
+            Case esriGraphicAttributeType.esriAttributeTypeAngle
+                GetGraphicAttributeType = "Angle"
+            Case esriGraphicAttributeType.esriAttributeTypeBoolean
+                GetGraphicAttributeType = "Boolean"
+            Case esriGraphicAttributeType.esriAttributeTypeColor
+                GetGraphicAttributeType = "Color"
+            Case esriGraphicAttributeType.esriAttributeTypeDash
+                GetGraphicAttributeType = "Dash"
+            Case esriGraphicAttributeType.esriAttributeTypeDouble
+                GetGraphicAttributeType = "Double"
+            Case esriGraphicAttributeType.esriAttributeTypeEnum
+                GetGraphicAttributeType = "Enum"
+            Case esriGraphicAttributeType.esriAttributeTypeInteger
+                GetGraphicAttributeType = "Integer"
+            Case esriGraphicAttributeType.esriAttributeTypeMarker
+                GetGraphicAttributeType = "Marker"
+            Case esriGraphicAttributeType.esriAttributeTypeSize
+                GetGraphicAttributeType = "Size"
+            Case esriGraphicAttributeType.esriAttributeTypeText
+                GetGraphicAttributeType = "Text"
+            Case Else
+                GetGraphicAttributeType = "Unknown"
+        End Select
+    End Function
 
     Function GetUnits(ByRef lUnits As Integer) As String
         Select Case lUnits
