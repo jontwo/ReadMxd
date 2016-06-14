@@ -781,7 +781,7 @@ Module modReadMxd
                     mxdProps.sDataSources(mxdProps.lDataSources) = pDataset.Workspace.PathName
                     AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
                 Catch ex As Exception
-                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read data source name")
+                    sw.WriteLine(InsertTabs(2) & "WARNING: Could not read data source name. Data link may be broken.")
                 End Try
                 sw.WriteLine("")
             Next

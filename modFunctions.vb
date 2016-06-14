@@ -374,8 +374,8 @@ Module ModFunctions
             sw.WriteLine(InsertTabs(lTabLevel) & "Band count: " & pRasterLayer.BandCount)
             Try
                 sw.WriteLine(InsertTabs(lTabLevel) & "Pyramids: " & pRasterLayer.PyramidPresent)
-            Catch ex As Exception
-                sw.WriteLine(InsertTabs(lTabLevel) & "Error: could not get pyramid info. " & ex.Message)
+            Catch
+                sw.WriteLine(InsertTabs(lTabLevel) & "WARNING: Could not get pyramid info. Data link may be broken.")
             End Try
 
             If Not pRasterLayer.Raster Is Nothing Then
