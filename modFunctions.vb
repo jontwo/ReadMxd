@@ -25,6 +25,7 @@ Imports ESRI.ArcGIS.esriSystem
 Imports ESRI.ArcGIS.Geodatabase
 Imports ESRI.ArcGIS.GISClient
 Imports ESRI.ArcGIS.Geometry
+Imports ESRI.ArcGIS.NetworkAnalyst
 Imports System.Text.RegularExpressions
 
 
@@ -434,6 +435,10 @@ Module ModFunctions
                 Next lGLayer
             End If
 
+        ElseIf TypeOf pLayer Is INetworkLayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Network layer")
+        ElseIf TypeOf pLayer Is INALayer Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Network Analysis layer")
         Else
             sw.WriteLine(InsertTabs(lTabLevel) & "*** Unknown layer type ***")
         End If 'layer type
@@ -2216,7 +2221,7 @@ Module ModFunctions
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Right justification")
                 mxdProps.bStackR = True
             End If
-            If pMpxStackProps.SeparatorCount Then 'mxdProps.lSeparators < 32 And 
+            If pMpxStackProps.SeparatorCount Then 'mxdProps.lSeparators < 32 And
                 For i = 0 To pMpxStackProps.SeparatorCount - 1
                     pMpxStackProps.QuerySeparator(i, mxdProps.sSeparators(mxdProps.lSeparators), mxdProps.bSepVis, mxdProps.bSepFor, mxdProps.bSepAft)
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Separator '" & mxdProps.sSeparators(mxdProps.lSeparators) & "' Visible: " & mxdProps.bSepVis & _
