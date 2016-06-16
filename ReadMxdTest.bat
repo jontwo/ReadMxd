@@ -1,7 +1,7 @@
 
 @echo off
 
-set READMXD=d:\Projects\ReadMxd\dist\ReadMxdW.exe
+set READMXD=C:\Users\virtual\Documents\Visual Studio 2010\Projects\ReadMxd\dist\ReadMxdW.exe
 set TESTDIR=c:\temp\ReadMxdTest
 set LOGFILE=%TESTDIR%\_results.txt
 if exist %TESTDIR% (rmdir %TESTDIR% /s)
@@ -9,8 +9,7 @@ mkdir %TESTDIR%
 pushd %TESTDIR%
 echo Starting ReadMxd test at %DATE% %TIME%> %LOGFILE%
 
-call :searchFolder d:\maps
-call :searchFolder C:\Users\jpm\Documents\ArcGIS
+call :searchFolder C:\Users\virtual\Documents
 
 :: check for errors etc ::
 set TESTDIR=/%TESTDIR:\=/%
@@ -60,7 +59,7 @@ setlocal
 			echo !LOGNAME! already exists, renaming
 			ren "%TESTDIR%\!LOGNAME!" "!LOGNAME:.log=!_!DATESTAMP!.log"
 		)
-		call %READMXD% %1\%%a -s -b -y -e
+		call "%READMXD%" %1\%%a -s -b -y -e
 	)
 endlocal
 goto :eof
