@@ -515,8 +515,6 @@ Module ModFunctions
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Count")
                 Case esriRasterStretchTypesEnum.esriRasterStretch_Custom
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Custom")
-                Case esriRasterStretchTypesEnum.esriRasterStretch_ESRI
-                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: ESRI")
                 Case esriRasterStretchTypesEnum.esriRasterStretch_NONE
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: NONE")
                 Case esriRasterStretchTypesEnum.esriRasterStretch_PercentMinimumMaximum
@@ -2607,8 +2605,6 @@ Module ModFunctions
 
     Function GetGraphicAttributeType(ByRef eGraphType As esriGraphicAttributeType) As String
         Select Case eGraphType
-            Case esriGraphicAttributeType.esriAttributeTypeAngle
-                GetGraphicAttributeType = "Angle"
             Case esriGraphicAttributeType.esriAttributeTypeBoolean
                 GetGraphicAttributeType = "Boolean"
             Case esriGraphicAttributeType.esriAttributeTypeColor
