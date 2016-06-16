@@ -207,14 +207,33 @@ Module modReadMxd
             'Create a GxLayer.
             Dim gxLayerCls As IGxLayer = New GxLayerClass
             Dim gxFile As IGxFile = gxLayerCls 'Implicit Cast.
+            Dim pDocVersion As IDocumentVersion
             'Set the path for where the layer file is located on disk.
             gxFile.Path = sMxdName
+
+            pDocVersion = TryCast(gxLayerCls, IDocumentVersion)
+            Select Case pDocVersion.DocumentVersion
+                Case esriArcGISVersion.esriArcGISVersion83
+                    sw.WriteLine("Document version 8.3")
+                Case esriArcGISVersion.esriArcGISVersion90
+                    sw.WriteLine("Document version 9.0")
+                Case esriArcGISVersion.esriArcGISVersion92
+                    sw.WriteLine("Document version 9.2")
+                Case esriArcGISVersion.esriArcGISVersion93
+                    sw.WriteLine("Document version 9.3")
+                Case esriArcGISVersion.esriArcGISVersion10
+                    sw.WriteLine("Document version 10.0")
+                Case esriArcGISVersion.esriArcGISVersionCurrent
+                    sw.WriteLine("Document is current version")
+                Case Else
+                    sw.WriteLine("Document version unknown")
+            End Select
 
             'file attributes
             sw.WriteLine("Last Modified: " & File.GetLastWriteTime(sMxdName))
             sw.WriteLine(vbCrLf & InsertTabs(1) & "Layer properties:")
             If Not gxLayerCls.Layer Is Nothing Then
-                GetLayerProps(gxLayerCls.Layer(), 2)
+                GetLayerProps(gxLayerCls.Layer, 2)
             End If
             sw.WriteLine("")
             If bReadLabels Then WriteLabelSummary()
