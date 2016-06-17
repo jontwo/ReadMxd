@@ -31,8 +31,16 @@ Imports System.Text.RegularExpressions
 
 Module ModFunctions
 
+    Friend pFGDBWksFactory As IWorkspaceFactory
+    Friend pPGDBWksFactory As IWorkspaceFactory
+    Friend pSDEWksFactory As IWorkspaceFactory
+    Friend pShapeWksFactory As IWorkspaceFactory
+    Friend pArcCovWksFactory As IWorkspaceFactory
+    Friend pPCCovWksFactory As IWorkspaceFactory
+
     Public Sub GetLayerProps(ByRef pLayer As ILayer, ByRef lTabLevel As Integer, Optional ByRef bSymbolLevels As Boolean = False)
         sw.Flush()
+
         Dim pSubLayer As ILayer
         Dim pCompLayer As ICompositeLayer
         Dim pGraphicsLayer As IGraphicsLayer
@@ -83,55 +91,18 @@ Module ModFunctions
                     AddIfUnique(mxdProps.lDataSources, mxdProps.sDataSources, ARRAY_SIZE)
 
                     'find datasource type
-                    Dim pWksF As WorkspaceFactory
-                    Dim bDone As Boolean = False
-                    'personal gdb
-                    If Not bDone And Not mxdProps.bPGDB Then
-                        pWksF = New AccessWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bPGDB = True
-                            bDone = True
-                        End If
-                    End If
-                    'file gdb
-                    If Not bDone And Not mxdProps.bFGDB Then
-                        pWksF = New FileGDBWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bFGDB = True
-                            bDone = True
-                        End If
-                    End If
-                    'shapefile
-                    If Not bDone And Not mxdProps.bSHP Then
-                        pWksF = New ShapefileWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bSHP = True
-                            bDone = True
-                        End If
-                    End If
-                    'arcinfo coverage
-                    If Not bDone And Not mxdProps.bCoverage Then
-                        pWksF = New ArcInfoWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bCoverage = True
-                            bDone = True
-                        End If
-                    End If
-                    'pc coverage
-                    If Not bDone And Not mxdProps.bCoverage Then
-                        pWksF = New PCCoverageWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bCoverage = True
-                            bDone = True
-                        End If
-                    End If
-                    'sde
-                    If Not bDone And Not mxdProps.bSDE Then
-                        pWksF = New SdeWorkspaceFactory
-                        If pWksF.IsWorkspace(pWSName.PathName) Then
-                            mxdProps.bSDE = True
-                            bDone = True
-                        End If
+                    If IsFileGDB(pWSName) Then
+                        mxdProps.bFGDB = True
+                    ElseIf IsSDE(pWSName) Then
+                        mxdProps.bSDE = True
+                    ElseIf IsPersonalGDB(pWSName) Then
+                        mxdProps.bPGDB = True
+                    ElseIf IsShapefile(pWSName) Then
+                        mxdProps.bSHP = True
+                    ElseIf IsArcInfoCoverage(pWSName) Then
+                        mxdProps.bCoverage = True
+                    ElseIf IsPCCoverage(pWSName) Then
+                        mxdProps.bCoverage = True
                     End If
                 End If 'not server layer
             Catch ex As Exception
@@ -3043,6 +3014,48 @@ Module ModFunctions
             IsQualifiedName = True
         End If
 
+    End Function
+
+    Function IsFileGDB(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pFGDBWksFactory Is Nothing Then
+            pFGDBWksFactory = New FileGDBWorkspaceFactory
+        End If
+        Return pFGDBWksFactory.IsWorkspace(pWorkspaceName.PathName)
+    End Function
+
+    Function IsPersonalGDB(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pPGDBWksFactory Is Nothing Then
+            pPGDBWksFactory = New AccessWorkspaceFactory
+        End If
+        Return pPGDBWksFactory.IsWorkspace(pWorkspaceName.PathName)
+    End Function
+
+    Function IsShapefile(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pShapeWksFactory Is Nothing Then
+            pShapeWksFactory = New ShapefileWorkspaceFactory
+        End If
+        Return pShapeWksFactory.IsWorkspace(pWorkspaceName.PathName)
+    End Function
+
+    Function IsSDE(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pSDEWksFactory Is Nothing Then
+            pSDEWksFactory = New SdeWorkspaceFactory
+        End If
+        Return pSDEWksFactory.IsWorkspace(pWorkspaceName.PathName)
+    End Function
+
+    Function IsArcInfoCoverage(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pArcCovWksFactory Is Nothing Then
+            pArcCovWksFactory = New ArcInfoWorkspaceFactory
+        End If
+        Return pArcCovWksFactory.IsWorkspace(pWorkspaceName.PathName)
+    End Function
+
+    Function IsPCCoverage(ByRef pWorkspaceName As IWorkspaceName) As Boolean
+        If pPCCovWksFactory Is Nothing Then
+            pPCCovWksFactory = New PCCoverageWorkspaceFactory
+        End If
+        Return pPCCovWksFactory.IsWorkspace(pWorkspaceName.PathName)
     End Function
 
     ' Find possible coded value domains for a given field of a feature layer
