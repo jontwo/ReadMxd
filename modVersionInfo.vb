@@ -25,6 +25,16 @@ Public Class ArcInit
 
     Public m_Version As Integer
     Public m_VerStr As String
+    Protected pAoInitialize As esriSystem.IAoInitialize
+
+    Public Sub Shutdown()
+        If Not pAoInitialize Is Nothing Then
+            pAoInitialize.Shutdown()
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(pAoInitialize)
+            pAoInitialize = Nothing
+        End If
+    End Sub
+
     <Security.Permissions.EnvironmentPermissionAttribute(Security.Permissions.SecurityAction.LinkDemand, Unrestricted:=True)> _
     Public Function LoadVersionAndCheckOutLicense(ByRef sErr As String) As Boolean
         LoadVersionAndCheckOutLicense = True
@@ -55,7 +65,6 @@ Public Class ArcInit
         End If
 
         'check license
-        Dim pAoInitialize As esriSystem.IAoInitialize
         pAoInitialize = New esriSystem.AoInitialize
 
         Dim licenseStatus As esriSystem.esriLicenseStatus
