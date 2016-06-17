@@ -441,7 +441,7 @@ Module modReadMxd
                 If Not pMapClipOptions.ClipGeometry Is Nothing Then
                     mxdProps.bClipExtent = True
                     sw.WriteLine(InsertTabs(1) & "Clip shape: " & GetGeomType(pMapClipOptions.ClipGeometry.GeometryType))
-                    sw.WriteLine(InsertTabs(2) & "Coords: " & pMapClipOptions.ClipGeometry.Envelope.XMin & "," & pMapClipOptions.ClipGeometry.Envelope.YMin & "-" & pMapClipOptions.ClipGeometry.Envelope.XMax & "," & pMapClipOptions.ClipGeometry.Envelope.YMax)
+                    sw.WriteLine(InsertTabs(2) & "Coords: " & pMapClipOptions.ClipGeometry.Envelope.XMin & ", " & pMapClipOptions.ClipGeometry.Envelope.YMin & ", " & pMapClipOptions.ClipGeometry.Envelope.XMax & ", " & pMapClipOptions.ClipGeometry.Envelope.YMax)
                     If Not pMapClipOptions.ClipBorder Is Nothing Then sw.WriteLine(InsertTabs(2) & "Border")
                     'Print # InsertTabs(2) & "Clip Data: " & pMapClipOptions.ClipData
                     pLayerSet = pMapClipOptions.ClipFilter
@@ -465,7 +465,7 @@ Module modReadMxd
                     mxdProps.bClipExtent = True
                     sw.WriteLine(InsertTabs(1) & "Clip shape: " & GetGeomType(pMap.ClipGeometry.GeometryType))
                     If pMap.ClipGeometry.GeometryType = esriGeometryType.esriGeometryBag Then mxdProps.bClipToShape = True
-                    sw.WriteLine(InsertTabs(2) & "Coords: " & pMap.ClipGeometry.Envelope.XMin & "," & pMap.ClipGeometry.Envelope.YMin & "-" & pMap.ClipGeometry.Envelope.XMax & "," & pMap.ClipGeometry.Envelope.YMax)
+                    sw.WriteLine(InsertTabs(2) & "Coords: " & pMap.ClipGeometry.Envelope.XMin & ", " & pMap.ClipGeometry.Envelope.YMin & ", " & pMap.ClipGeometry.Envelope.XMax & ", " & pMap.ClipGeometry.Envelope.YMax)
                     If Not pMap.ClipBorder Is Nothing Then sw.WriteLine(InsertTabs(2) & "Border")
                 End If 'clipgeometry
             End If 'bclipextent
