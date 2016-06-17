@@ -236,6 +236,7 @@ Module modReadMxd
             If bReadSymbols Then WriteSymbolSummary()
             WriteGeneralSummary()
             sw.WriteLine(vbCrLf & "OK")
+            arc.Shutdown()
             Exit Sub
         End If
 
@@ -252,6 +253,7 @@ Module modReadMxd
             pActiveView.Activate(GetDesktopWindow())
         Catch e As Exception
             sw.WriteLine("Error: document would not open. " & e.ToString)
+            arc.Shutdown()
             Exit Sub
         End Try
 
@@ -829,6 +831,7 @@ Module modReadMxd
         End If
         WriteGeneralSummary()
         sw.WriteLine(vbCrLf & "OK")
+        arc.Shutdown()
 
     End Sub
 
