@@ -604,9 +604,9 @@ Module ModFunctions
                 For i = 0 To pRendFields.FieldCount - 1
                     If i < ARRAY_SIZE Then
                         If pRendFields.FieldAlias(i) <> "" Then
-                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i)
+                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i) & vbCrLf & InsertTabs(lTabLevel + 1) & "Alias: " & pRendFields.FieldAlias(i)
                         Else
-                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i) & " Alias: " & pRendFields.FieldAlias(i)
+                            pFieldNames(i) = InsertTabs(lTabLevel + 1) & "Name: " & pRendFields.Field(i)
                         End If
                     End If
                 Next
