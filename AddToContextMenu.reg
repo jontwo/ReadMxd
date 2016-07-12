@@ -1,0 +1,47 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd]
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e"
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd All Layers]
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd All Layers\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -a"
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd Symbols]
+
+[HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd Symbols\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd]
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e"
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd All Layers]
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd All Layers\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -a"
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd Symbols]
+
+[HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd Symbols\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd]
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e"
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd All Layers]
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd All Layers\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -a"
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd Symbols]
+
+[HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd Symbols\command]
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+
