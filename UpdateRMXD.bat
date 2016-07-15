@@ -14,6 +14,7 @@ if exist %~dp0bin\x64\Release (
 
 echo copying Latest ReadMxd to:
 call :copyRMXD D:\Projects\ReadMxd\dist
+call :copyRMXD \\getech\store\utilities\PC\ReadMxd\10.3
 
 :end
 echo.
@@ -35,4 +36,5 @@ if exist "%SRCDIR%\ReadMxdXI.exe" xcopy "%SRCDIR%\ReadMxdXI.exe" %1 /y /q
 if exist "%SRCDIR%\ReadMxdXI.pdb" xcopy "%SRCDIR%\ReadMxdXI.pdb" %1 /y /q
 if exist "%SRCDIR%\Ionic.Utils.Zip.dll" xcopy "%SRCDIR%\Ionic.Utils.Zip.dll" %1 /y /q
 if exist "%SRCDIR%\Interop.ArcGISVersionLib.dll" xcopy "%SRCDIR%\Interop.ArcGISVersionLib.dll" %1 /y /q
+if exist "README.md" xcopy "README.md" %1 /y /q
 goto :eof
