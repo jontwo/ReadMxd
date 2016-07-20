@@ -97,14 +97,19 @@ Module modReadMxd
         'detect file type
         Select Case IO.Path.GetExtension(sMxdName).ToLower()
             Case ".txt"
-                'read file list
-                Dim sr As StreamReader = File.OpenText(sMxdName)
-                Dim sLine As String = sr.ReadLine
-                While Not sLine = vbNullString
-                    OpenLogAndMxd(sLine, bLocalLog, bExcel)
-                    sLine = sr.ReadLine
-                End While
-                sr.Close()
+                If Not File.Exists(sMxdName) Then
+                    'text file not found, call OpenLogAndMxd anyway so it writes to log
+                    OpenLogAndMxd(sMxdName, bLocalLog, bExcel)
+                Else
+                    'read file list
+                    Dim sr As StreamReader = File.OpenText(sMxdName)
+                    Dim sLine As String = sr.ReadLine
+                    While Not sLine = vbNullString
+                        OpenLogAndMxd(sLine, bLocalLog, bExcel)
+                        sLine = sr.ReadLine
+                    End While
+                    sr.Close()
+                End If
             Case ".mxd", ".msd", ".aprx"
                 OpenLogAndMxd(sMxdName, bLocalLog, bExcel)
             Case ".lyr"
