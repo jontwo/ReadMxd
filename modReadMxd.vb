@@ -235,7 +235,10 @@ Module modReadMxd
             sw.WriteLine("Last Modified: " & File.GetLastWriteTime(sMxdName))
             sw.WriteLine(vbCrLf & InsertTabs(1) & "Layer properties:")
             If Not gxLayerCls.Layer Is Nothing Then
-                GetLayerProps(gxLayerCls.Layer, 2)
+                'clone layer otherwise ArcObjects attempts to save it when it goes out of scope
+                Dim tempLayer As ILayer = gxLayerCls.Layer
+                GetLayerProps(tempLayer, 2)
+                gxFile.Close(False)
             End If
             sw.WriteLine("")
             If bReadLabels Then WriteLabelSummary()
