@@ -415,6 +415,46 @@ Module ModFunctions
         End If 'layer type
     End Sub
 
+    Sub GetClassificationMethod(ByRef pRasClassifyUIProps As IRasterClassifyUIProperties, ByRef lTabLevel As Integer)
+        'QI all possible methods to determine which one it is
+        Dim pMethodUID As UID
+        Dim pClassify As IClassify
+        pMethodUID = pRasClassifyUIProps.ClassificationMethod
+        If pMethodUID Is Nothing Then Return
+        pClassify = New NaturalBreaksClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+        pClassify = New StandardDeviationClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+        pClassify = New DefinedIntervalClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+        pClassify = New EqualIntervalClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+        pClassify = New GeometricalIntervalClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+        pClassify = New QuantileClass
+        If pClassify.ClassID.Value = pMethodUID.Value Then
+            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+            Return
+        End If
+
+    End Sub
+
+
     Sub GetRasterRendererProps(ByRef pRR As IRasterRenderer, ByRef lTabLevel As Integer, ByRef bSymbolLevels As Boolean)
         sw.Flush()
         'Dim sTmp As String
@@ -431,6 +471,14 @@ Module ModFunctions
             sw.WriteLine(InsertTabs(lTabLevel) & "Raster Classify Color Ramp Renderer")
             mxdProps.bRasterClassify = True
             pClassCRRend = pRR
+            Dim pRasterClassifyUIProps As IRasterClassifyUIProperties
+            pRasterClassifyUIProps = pClassCRRend
+            If Not pRasterClassifyUIProps Is Nothing Then
+                GetClassificationMethod(pRasterClassifyUIProps, lTabLevel)
+                sw.WriteLine(InsertTabs(lTabLevel) & "Color ramp: " & pRasterClassifyUIProps.ColorRamp)
+                sw.WriteLine(InsertTabs(lTabLevel) & "Deviation interval: " & pRasterClassifyUIProps.DeviationInterval)
+                If pRasterClassifyUIProps.ShowClassGaps Then sw.WriteLine(InsertTabs(lTabLevel) & "Show class gaps")
+            End If
             sw.WriteLine(InsertTabs(lTabLevel) & "Class count: " & pClassCRRend.ClassCount)
             sw.WriteLine(InsertTabs(lTabLevel) & "Class field: " & pClassCRRend.ClassField)
             For i = 0 To pClassCRRend.ClassCount - 1
@@ -474,22 +522,31 @@ Module ModFunctions
             Select Case pRasterStretch2.StretchType
                 Case esriRasterStretchTypesEnum.esriRasterStretch_StandardDeviations
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Standard deviations")
+                    mxdProps.bStretchStdDev = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_HistogramEqualize
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Histogram equalize")
+                    mxdProps.bStretchHistEq = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_HistogramSpecification
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Histogram specification")
+                    mxdProps.bStretchHistSpec = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_MinimumMaximum
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Minimum maximum")
+                    mxdProps.bStretchMinMax = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_DefaultFromSource
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Default")
+                    mxdProps.bStretchDefault = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_Count
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Count")
+                    mxdProps.bStretchCount = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_Custom
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Custom")
+                    mxdProps.bStretchCustom = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_NONE
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: NONE")
+                    mxdProps.bStretchNone = True
                 Case esriRasterStretchTypesEnum.esriRasterStretch_PercentMinimumMaximum
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Percent minimum maximum")
+                    mxdProps.bStretchPercent = True
                 Case Else
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Unknown")
             End Select

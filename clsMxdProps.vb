@@ -88,6 +88,8 @@ Public Class clsMxdProps
     Public bPieChart, bBarChart, bStackedChart, bSimpleFill, bGradientFill, bPictureFill, bMarkerFill, bLineFill As Boolean
     Public bFixedSize, bChartLeaders, b3DChart, bChartOverlap, bBarOrient, bColumnOrient, bGeogOrient, bArithOrient As Boolean
     Public bColorRamp, bRasterClassify, bRasterRGB, bRasterUnique, bRasterDiscrete, bRasterStretch As Boolean
+    Public bStretchStdDev, bStretchHistEq, bStretchHistSpec, bStretchMinMax, bStretchCount, bStretchPercent As Boolean
+    Public bStretchCustom, bStretchEsri, bStretchNone, bStretchDefault As Boolean
     'TODO more symbols on summary
 
     'map props
