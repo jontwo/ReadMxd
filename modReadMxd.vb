@@ -209,6 +209,7 @@ Module modReadMxd
 
         'layer file - go straight to layer props
         If bLyrFile Then
+            mxdProps.lMapCount = 0
             'Create a GxLayer.
             Dim gxLayerCls As IGxLayer = New GxLayerClass
             Dim gxFile As IGxFile = gxLayerCls 'Implicit Cast.
@@ -244,6 +245,7 @@ Module modReadMxd
             If bReadLabels Then WriteLabelSummary()
             If bReadSymbols Then WriteSymbolSummary()
             WriteGeneralSummary()
+            If bExcel Then WriteXLS(sMxdName)
             sw.WriteLine(vbCrLf & "OK")
             arc.Shutdown()
             Exit Sub
@@ -880,11 +882,11 @@ Module modReadMxd
 
         If bReadSymbols Then
             WriteSymbolSummary()
-            If bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
+            If bExcel Then WriteXLS(sMxdName)
         End If
         If bReadLabels Then
             WriteLabelSummary()
-            If mxdProps.bMLE And bExcel And File.Exists(sSummaryXls) Then WriteXLS(sMxdName)
+            If mxdProps.bMLE And bExcel Then WriteXLS(sMxdName)
         End If
         WriteGeneralSummary()
         sw.WriteLine(vbCrLf & "OK")
@@ -1261,16 +1263,382 @@ Module modReadMxd
         Dim lMaxCols As Long
         Dim lBlankRows As Long
         Dim sCellVal As String
+        Dim bNewXls As Boolean
         xlApp.DisplayAlerts = False
 
         Try
-            xlWbook = xlApp.Workbooks.Open(sSummaryXls)
+            If Not File.Exists(sSummaryXls) Then
+                xlWbook = xlApp.Workbooks.Add(System.Reflection.Missing.Value)
+                xlWbook.SaveAs(sSummaryXls)
+                bNewXls = True
+            Else
+                xlWbook = xlApp.Workbooks.Open(sSummaryXls)
+            End If
             xlSheet1 = xlWbook.Sheets.Item(1)
             lMaxCols = xlSheet1.Columns.CountLarge
             lMaxRows = xlSheet1.Rows.CountLarge
 
             lCol = xlSheet1.Range(xlSheet1.Cells(1, lMaxCols - 1), xlSheet1.Cells(1, lMaxCols)).End(Microsoft.Office.Interop.Excel.XlDirection.xlToLeft).Column + 1
-            'clear contents first
+
+            If bNewXls Then
+                'add row headings
+                xlSheet1.Cells(lRow, 1) = "Layer Definition Query"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Scale Ranges"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Data Frame Rotation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Map Units"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Spatial Reference"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Reference Scale"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Automatic Extent"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fixed Extent"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fixed Scale"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Clip Extent"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Clip To Shape"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Exclude Layers"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Multiple Dataframes"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Data View"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Layout View"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Shapefiles"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Personal GDB"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "File GDB"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "SDE"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Absolute Paths"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Symbols:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Bar Chart"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Pie Chart"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stacked Chart"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Simple Fill"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Gradient Fill"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Marker Fill"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Picture Fill"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Line Fill"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fixed Size"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Leaders"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "3d Chart"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Chart Overlap"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Bar Orientation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Column Orientation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Arithmetic Orientation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Geographic Orientation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Raster Classify Color Ramp Renderer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Raster Stretch Color Ramp Renderer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Raster Discrete Color Renderer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Raster RGB Renderer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Raster Unique Value Renderer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Standard deviations"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Histogram equalize"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Histogram specification"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Minimum maximum"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Default"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Count"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Custom"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: ESRI"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: NONE"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stretch type: Percent minimum maximum"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Labels:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Polygons:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Horizontal"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Straight"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Curved"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Offset Horizontal"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Offset Curved"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Regular"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Land Parcel"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "River"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Boundary"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Single Sided"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Allow Holes"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "On Line"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Try Horizontal First"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "May Place Outside"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Offset Distance"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Preferred Offset"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Feature Geometry"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Graticule:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Straight (No Flip)"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Curved (No Flip)"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Internal Zones"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "External Zones"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Anchor Points"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Repeat"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Spread Chars"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Lines:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Centered Horizontal"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Centered Straight"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Centered Curved"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Centered Perpendicular"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Offset Straight"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Offset Perpendicular"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Street"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Reduce Leading"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Primary Name Under"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Spread Words"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Street Address"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Contour"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Alignment"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Ladders"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Secondary Offset"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Constraint"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Position"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Straddlacking"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Align To Direction"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Near Border"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Near Junction"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Points:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fixed"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "May Shift"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Best"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Zones"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Altered Zones"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Symbol Outline"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Rotation:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Additional Angle"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "May Flip"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Multipoint"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Whitespace"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Line Breaks"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Strategies:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stack:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Stacking Chars"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Limits"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Overrun (Value)"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Overrun (Asymmetric)"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Font Reduction"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Font Compression"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Abbreviation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Translation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Keyword"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Ending"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Truncation"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Length"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Marker"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Preferred Chars"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Key Numbering"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Strategy Order"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Minimum Size"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Conflicts:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Weights"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Background Labels"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Remove Duplicates"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Buffer"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Hard Constraint"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Never Remove"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Text Symbol:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "X/Y Offset"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Right To Left"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Text Position"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Text Case"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Char Spacing"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Leading"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Char Width"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Word Spacing"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Kerning Off"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fill Symbol"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Text Background:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Balloon Callout"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Line Callout"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Marker Text Background"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Scale To Fit Text"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Simple Line Callout"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Shadow"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Halo"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "CJK"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Misc:"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Sql Query"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Expression"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Tags BSE"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Tags Other"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Rotate Labels With Dataframe"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Inverted Label Tolerance"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Line Connection"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Allow Border Overlap"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Largest Only"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Label Priority Ranking"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Graphic Barriers/Anno"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Fast Placement"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Qualified Names"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Html Entities"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Coded Value Domain"
+                lRow = lRow + 1
+                xlSheet1.Cells(lRow, 1) = "Unplaced Labels"
+                lRow = 3
+            End If
+
+            'clear current column first
             xlSheet1.Range(xlSheet1.Cells(lRow, lCol), xlSheet1.Cells(lMaxRows, lCol)).Value2 = vbNullString
 
             'keep going until reach last entry or end of spreadsheet
@@ -1284,6 +1652,7 @@ Module modReadMxd
                     sCellVal = xlSheet1.Cells(lRow, 1).value2
                     lBlankRows = 0 'reset
                 End If
+                'enter props using name instead of row num to make it easier to insert values at a later date
                 Select Case sCellVal.ToString.Trim.ToLower()
                     'keep track of how far through we are to handle duplicates:
                     'alignment
@@ -1777,7 +2146,7 @@ Module modReadMxd
             sw.WriteLine(e.ToString)
         Finally
             'save and close
-            xlApp.ActiveWorkbook.Close(True)
+            If Not xlApp.ActiveWorkbook Is Nothing Then xlApp.ActiveWorkbook.Close(True)
             xlApp.Quit()
             releaseObject(xlSheet1)
             releaseObject(xlWbook)
