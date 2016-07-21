@@ -523,6 +523,7 @@ Module ModFunctions
                 Case esriRasterStretchTypesEnum.esriRasterStretch_StandardDeviations
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Standard deviations")
                     mxdProps.bStretchStdDev = True
+                    sw.WriteLine(InsertTabs(lTabLevel + 1) & "n: " & pRasterStretch2.StandardDeviationsParam)
                 Case esriRasterStretchTypesEnum.esriRasterStretch_HistogramEqualize
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Histogram equalize")
                     mxdProps.bStretchHistEq = True
@@ -550,6 +551,7 @@ Module ModFunctions
                 Case Else
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Stretch type: Unknown")
             End Select
+            If pRasterStretch2.Invert Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Invert")
             If pRasterStretch3.UseGamma Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Gamma: " & pRasterStretch3.GammaValue)
         ElseIf TypeOf pRR Is IRasterUniqueValueRenderer Then
             sw.WriteLine(InsertTabs(lTabLevel) & "Raster Unique Value Renderer")
