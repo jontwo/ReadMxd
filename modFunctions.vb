@@ -559,30 +559,26 @@ Module ModFunctions
             pUVR = pRR
             Dim iHeading As Integer
             Dim iClass As Integer
+            Dim iValue As Integer
+            If pUVR.Field <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Value field: " & pUVR.Field)
             If pUVR.ColorScheme <> "" Then sw.WriteLine(InsertTabs(lTabLevel) & "Colour Scheme: " & pUVR.ColorScheme)
             If pUVR.UseDefaultSymbol Then
                 sw.WriteLine(InsertTabs(lTabLevel) & "Use Default Symbol")
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Label: " & pUVR.DefaultLabel)
-                GetSymbolProps(pUVR.DefaultSymbol, lTabLevel + 1, bSymbolLevels)
+                GetSymbolProps(pUVR.DefaultSymbol, lTabLevel + 2, bSymbolLevels)
             End If
             sw.WriteLine(InsertTabs(lTabLevel) & "Number of headings: " & pUVR.HeadingCount)
             For iHeading = 0 To pUVR.HeadingCount - 1
                 sw.WriteLine(InsertTabs(lTabLevel) & "Heading " & iHeading + 1 & "(" & pUVR.Heading(iHeading) & "):")
                 sw.WriteLine(InsertTabs(lTabLevel) & "Number of classes: " & pUVR.ClassCount(iHeading))
                 For iClass = 0 To pUVR.ClassCount(iHeading) - 1
-                    GetSymbolProps(pUVR.Symbol(iHeading, iClass), lTabLevel + 1, bSymbolLevels)
-                    ' TODO value objects
-                    'sw.WriteLine(InsertTabs(lTabLevel) & "Number of values: " & pUVR.ValueCount(iHeading, iClass))
-                    'For i = 0 To pUVR.ValueCount(iHeading, iClass) - 1
-                    '    sw.WriteLine(InsertTabs(lTabLevel) & "Value " & i + 1 & "/" & pUVR.ValueCount & _
-                    '                 ": " & pUVR.Value(i) & " Label: " & pUVR.Label(pUVR.Value(i)))
-                    '    'VB.NET won't let you pass the symbol in if it is nothing
-                    '    If pUVR.Symbol(pUVR.Value(i)) Is Nothing Then
-                    '        GetSymbolProps(Nothing, lTabLevel + 1, bSymbolLevels)
-                    '    Else
-                    '        GetSymbolProps(pUVR.Symbol(pUVR.Value(i)), lTabLevel + 1, bSymbolLevels)
-                    '    End If
-                    'Next
+                    If pUVR.Description(iHeading, iClass) <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Description: " & pUVR.Description(iHeading, iClass))
+                    If pUVR.Label(iHeading, iClass) <> "" Then sw.WriteLine(InsertTabs(lTabLevel + 1) & "Label: " & pUVR.Label(iHeading, iClass))
+                    GetSymbolProps(pUVR.Symbol(iHeading, iClass), lTabLevel + 2, bSymbolLevels)
+                    sw.WriteLine(InsertTabs(lTabLevel + 2) & "Number of values: " & pUVR.ValueCount(iHeading, iClass))
+                    For iValue = 0 To pUVR.ValueCount(iHeading, iClass) - 1
+                        sw.WriteLine(InsertTabs(lTabLevel + 3) & "Value " & i + 1 & "/" & pUVR.ValueCount(iHeading, iClass) & ": " & pUVR.Value(iHeading, iClass, iValue))
+                    Next
                 Next
             Next
         Else
@@ -755,8 +751,7 @@ Module ModFunctions
             End If
             sw.WriteLine(InsertTabs(lTabLevel) & "Number of values: " & pUVR.ValueCount)
             For i = 0 To pUVR.ValueCount - 1
-                sw.WriteLine(InsertTabs(lTabLevel) & "Value " & i + 1 & "/" & pUVR.ValueCount & _
-                             ": " & pUVR.Value(i) & " Label: " & pUVR.Label(pUVR.Value(i)))
+                sw.WriteLine(InsertTabs(lTabLevel) & "Value " & i + 1 & "/" & pUVR.ValueCount & ": " & pUVR.Value(i) & " Label: " & pUVR.Label(pUVR.Value(i)))
                 'VB.NET won't let you pass the symbol in if it is nothing
                 If pUVR.Symbol(pUVR.Value(i)) Is Nothing Then
                     GetSymbolProps(Nothing, lTabLevel + 1, bSymbolLevels)
