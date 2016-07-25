@@ -366,7 +366,7 @@ Module ModFunctions
                         sw.WriteLine(InsertTabs(lTabLevel) & "Unknown resampling type")
                 End Select
             End If
-            If bReadSymbols Then
+            If bReadSymbols And (pLayer.Visible Or bAllLayers) Then
                 If TypeOf pRasterLayer.Renderer Is ILevelRenderer Then
                     pSymbolLevels = pRasterLayer
                     If pSymbolLevels.UseSymbolLevels Then
