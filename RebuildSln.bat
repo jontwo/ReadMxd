@@ -4,7 +4,7 @@ setlocal ENABLEDELAYEDEXPANSION
 set LOGFILE=bin\x86\Release\build.log
 
 :: rebuild solution in release ::
-call "c:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\ide\devenv.exe" ReadMxd.sln /rebuild "Release|x86" /out !LOGFILE!
+call "c:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe" ReadMxd.sln /rebuild "Release|x86" /out !LOGFILE!
 
 :: print last 3 lines of build log ::
 for /f "tokens=*" %%a in ('type !LOGFILE!') do (
