@@ -837,6 +837,8 @@ Module ModFunctions
                 pAlgCR = pRamp
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Algorithm: " & GetColorRampAlgorithm(pAlgCR.Algorithm))
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "From color (RGB): " & GetRGB(pAlgCR.FromColor))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "From color (CMYK): " & GetCMYK(pAlgCR.FromColor))
+                sw.WriteLine(InsertTabs(lTabLevel + 1) & "To color (RGB): " & GetRGB(pAlgCR.ToColor))
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "To color (CMYK): " & GetCMYK(pAlgCR.ToColor))
             ElseIf TypeOf pRamp Is IMultiPartColorRamp Then
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Multipart Color Ramp")
