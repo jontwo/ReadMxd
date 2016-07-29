@@ -13,7 +13,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd Symbols]
 
 [HKEY_CLASSES_ROOT\ArcMapDocument\shell\Read Mxd Symbols\command]
-@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s -a"
 
 [HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd]
 
@@ -28,7 +28,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd Symbols]
 
 [HKEY_CLASSES_ROOT\Layer.Document\shell\Read Mxd Symbols\command]
-@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s -a"
 
 [HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd]
 
@@ -43,5 +43,5 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd Symbols]
 
 [HKEY_CLASSES_ROOT\MapServiceDefinition\shell\Read Mxd Symbols\command]
-@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s"
+@="D:\\Projects\\ReadMxd\\dist\\ReadMxdW.exe  \"%1\" -l -e -s -a"
 
