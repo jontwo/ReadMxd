@@ -96,53 +96,56 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ESRI.ArcGIS.3DAnalyst, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.3DAnalyst.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.3DAnalyst">
+      <HintPath>..\assembly\ESRI.ArcGIS.3DAnalyst\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.3DAnalyst.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.Carto, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.Carto.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.Carto">
+      <HintPath>..\assembly\ESRI.ArcGIS.Carto\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Carto.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.Catalog, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.Catalog.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.Catalog">
+      <HintPath>..\assembly\ESRI.ArcGIS.Catalog\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Catalog.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.DataSourcesFile, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.DataSourcesFile.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.DataSourcesFile">
+      <HintPath>..\assembly\ESRI.ArcGIS.DataSourcesFile\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.DataSourcesFile.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.DataSourcesGDB, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.DataSourcesGDB.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.DataSourcesGDB">
+      <HintPath>..\assembly\ESRI.ArcGIS.DataSourcesGDB\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.DataSourcesGDB.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.Display, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.Display.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.Display">
+      <HintPath>..\assembly\ESRI.ArcGIS.Display\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Display.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.Geodatabase, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.Geodatabase.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.Geodatabase">
+      <HintPath>..\assembly\ESRI.ArcGIS.Geodatabase\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Geodatabase.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.Geometry, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.Geometry.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.Geometry">
+      <HintPath>..\assembly\ESRI.ArcGIS.Geometry\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Geometry.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.GISClient, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.GISClient.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.GISClient">
+      <HintPath>..\assembly\ESRI.ArcGIS.GISClient\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.GISClient.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.NetworkAnalyst, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+    <Reference Include="ESRI.ArcGIS.NetworkAnalyst">
+      <HintPath>..\assembly\ESRI.ArcGIS.NetworkAnalyst\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.NetworkAnalyst.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.System, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.System.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.System">
+      <HintPath>..\assembly\ESRI.ArcGIS.System\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.System.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ESRI.ArcGIS.SystemUI, Version=10.1.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\ArcGIS\DotNet\ESRI.ArcGIS.SystemUI.dll</HintPath>
+    <Reference Include="ESRI.ArcGIS.SystemUI">
+      <HintPath>..\assembly\ESRI.ArcGIS.SystemUI\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.SystemUI.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.Version">
+      <HintPath>..\assembly\ESRI.ArcGIS.Version\10.2.0.0__8fc3cc631e44ad86\ESRI.ArcGIS.Version.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Utils.Zip">
       <HintPath>.\Ionic.Utils.Zip.dll</HintPath>
@@ -150,22 +153,11 @@
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="System">
-      <Name>System</Name>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>
     <Reference Include="System.XML" />
-    <COMReference Include="ArcGISVersionLib">
-      <Guid>{6FCCEDE0-179D-4D12-B586-58C88D26CA78}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="stdole">
       <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
       <VersionMajor>2</VersionMajor>

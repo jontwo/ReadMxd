@@ -211,7 +211,7 @@ Module modReadMxd
         If bLyrFile Then
             mxdProps.lMapCount = 0
             'Create a GxLayer.
-            Dim gxLayerCls As IGxLayer = New GxLayerClass
+            Dim gxLayerCls As IGxLayer = New GxLayer
             Dim gxFile As IGxFile = gxLayerCls 'Implicit Cast.
             Dim pDocVersion As IDocumentVersion
             'Set the path for where the layer file is located on disk.

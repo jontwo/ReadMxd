@@ -360,8 +360,10 @@ Module ModFunctions
                 Dim pRas As IRaster
                 pRas = pRasterLayer.Raster
                 Select Case pRas.ResampleMethod
-                    Case rstResamplingTypes.RSP_Average
-                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Average")
+                    Case rstResamplingTypes.RSP_BilinearGaussBlur
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Bilinear Gauss Blur")
+                    Case rstResamplingTypes.RSP_BilinearGaussBlurPlus
+                        sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Bilinear Gauss Blur Plus")
                     Case rstResamplingTypes.RSP_CubicConvolution
                         sw.WriteLine(InsertTabs(lTabLevel) & "Resampling type: Cubic convolution")
                     Case rstResamplingTypes.RSP_BilinearInterpolation
@@ -427,40 +429,41 @@ Module ModFunctions
 
     Sub GetClassificationMethod(ByRef pRasClassifyUIProps As IRasterClassifyUIProperties, ByRef lTabLevel As Integer)
         'QI all possible methods to determine which one it is
-        Dim pMethodUID As UID
-        Dim pClassify As IClassify
-        pMethodUID = pRasClassifyUIProps.ClassificationMethod
-        If pMethodUID Is Nothing Then Return
-        pClassify = New NaturalBreaksClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
-        pClassify = New StandardDeviationClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
-        pClassify = New DefinedIntervalClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
-        pClassify = New EqualIntervalClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
-        pClassify = New GeometricalIntervalClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
-        pClassify = New QuantileClass
-        If pClassify.ClassID.Value = pMethodUID.Value Then
-            sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
-            Return
-        End If
+        sw.WriteLine(InsertTabs(lTabLevel) & "TODO Get classification method")
+        'Dim pMethodUID As UID
+        'Dim pClassify As IClassify
+        'pMethodUID = pRasClassifyUIProps.ClassificationMethod
+        'If pMethodUID Is Nothing Then Return
+        'pClassify = New NaturalBreaksClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
+        'pClassify = New StandardDeviationClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
+        'pClassify = New DefinedIntervalClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
+        'pClassify = New EqualIntervalClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
+        'pClassify = New GeometricalIntervalClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
+        'pClassify = New QuantileClass
+        'If pClassify.ClassID.Value = pMethodUID.Value Then
+        '    sw.WriteLine(InsertTabs(lTabLevel) & "Classification method: " & pClassify.MethodName)
+        '    Return
+        'End If
 
     End Sub
 
@@ -2368,7 +2371,7 @@ Module ModFunctions
                 sw.WriteLine(InsertTabs(lTabLevel + 1) & "Right justification")
                 mxdProps.bStackR = True
             End If
-            If pMpxStackProps.SeparatorCount Then 'mxdProps.lSeparators < 32 And 
+            If pMpxStackProps.SeparatorCount Then 'mxdProps.lSeparators < 32 And
                 For i = 0 To pMpxStackProps.SeparatorCount - 1
                     pMpxStackProps.QuerySeparator(i, mxdProps.sSeparators(mxdProps.lSeparators), mxdProps.bSepVis, mxdProps.bSepFor, mxdProps.bSepAft)
                     sw.WriteLine(InsertTabs(lTabLevel + 1) & "Separator '" & mxdProps.sSeparators(mxdProps.lSeparators) & "' Visible: " & mxdProps.bSepVis & _

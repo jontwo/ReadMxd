@@ -38,9 +38,6 @@ Public Class ArcInit
     <Security.Permissions.EnvironmentPermissionAttribute(Security.Permissions.SecurityAction.LinkDemand, Unrestricted:=True)> _
     Public Function LoadVersionAndCheckOutLicense(ByRef sErr As String) As Boolean
         LoadVersionAndCheckOutLicense = True
-        Dim VersMan As New ArcGISVersionLib.VersionManager
-        Dim pVersion As ArcGISVersionLib.IArcGISVersion
-        Dim bLoadOK As Boolean
 
         Dim sVer As String = vbNullString
         Dim fvVer As FileVersionInfo = GetArcGISVersion()
@@ -52,16 +49,10 @@ Public Class ArcInit
         sVer = fvVer.FileMajorPart.ToString & "." & fvVer.FileMinorPart.ToString
 
         'register version
-        If m_Version > 93 Then
-            pVersion = VersMan
-            'vista fix - need to do it twice!
-            bLoadOK = pVersion.LoadVersion(ArcGISVersionLib.esriProductCode.esriArcGISDesktop, sVer)
-            bLoadOK = pVersion.LoadVersion(ArcGISVersionLib.esriProductCode.esriArcGISDesktop, sVer)
-            If Not bLoadOK Then
-                LoadVersionAndCheckOutLicense = False
-                AddString(sErr, "Load version failed")
-                Exit Function
-            End If
+        If Not ESRI.ArcGIS.RuntimeManager.Bind(ESRI.ArcGIS.ProductCode.Desktop) Then
+            LoadVersionAndCheckOutLicense = False
+            AddString(sErr, "Load version failed")
+            Exit Function
         End If
 
         'check license
@@ -112,7 +103,7 @@ Public Class ArcInit
     Public Function GetArcGISVersion(Optional ByRef sDLLFile As String = "AfCore.dll") As FileVersionInfo
 
         Try
-            GetArcGISVersion = FileVersionInfo.GetVersionInfo(GetArcDir() & "bin\" & sDLLFile)
+            GetArcGISVersion = FileVersionInfo.GetVersionInfo(Path.Combine(GetArcDir(), "bin", sDLLFile))
             m_Version = GetArcGISVersion.FileMajorPart * 10 + GetArcGISVersion.FileMinorPart
             m_VerStr = GetArcGISVersion.FileVersion.ToString
         Catch ex As FileNotFoundException
@@ -127,21 +118,19 @@ Public Class ArcInit
         GetArcDir = ""
         'have a few goes at getting install dir, depending on version. use c:\arcgis if can't find it
         For Each esriKey As String In {"Wow6432Node\ESRI", "ESRI"}
-            '10.3
-            GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.3", esriKey), "InstallDir", Nothing)
-            '10.2
-            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.2", esriKey), "InstallDir", Nothing)
-            '10.1
-            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.1", esriKey), "InstallDir", Nothing)
-            '10
-            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop10.0", esriKey), "InstallDir", Nothing)
+            '10.x
+            For Each esriVersion As String In {"10.4", "10.3", "10.2", "10.1", "10.0"}
+                GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\Desktop{1}", esriKey, esriVersion), "InstallDir", Nothing)
+                If Len(GetArcDir) > 1 Then Return GetArcDir
+            Next
             '9.3
-            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}", esriKey), "InstallDir", Nothing)
+            GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}", esriKey), "InstallDir", Nothing)
+            If Len(GetArcDir) > 1 Then Return GetArcDir
             '9.2
-            If Len(GetArcDir) < 1 Then GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\ArcInfo\Desktop\8.0", esriKey), "InstallDir", Nothing)
+            GetArcDir = GetRegistryValue(String.Format("HKEY_LOCAL_MACHINE\Software\{0}\ArcInfo\Desktop\8.0", esriKey), "InstallDir", Nothing)
+            If Len(GetArcDir) > 1 Then Return GetArcDir
         Next
-        If Len(GetArcDir) < 1 Then GetArcDir = "C:\ArcGIS\"
-        If Right(GetArcDir, 1) <> "\" Then GetArcDir = GetArcDir & "\"
+        Return "C:\ArcGIS\"
 
     End Function
 
